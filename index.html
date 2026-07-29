@@ -1380,7 +1380,7 @@
 
 <script>
     /* ==================== 配置 ==================== */
-    const API_BASE = '';
+    const API_BASE = window.location.hostname === 'localhost' ? '' : 'https://api.jiachuang233.xyz';
 
     /* ==================== 状态管理 ==================== */
     let conversationHistory = [];
