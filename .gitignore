@@ -1,0 +1,5 @@
+node_modules/
+jiachuang.db
+jiachuang.db-shm
+jiachuang.db-wal
+.env
