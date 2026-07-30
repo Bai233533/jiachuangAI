@@ -48,9 +48,57 @@ function parseUrl(url) {
     return { path, params };
 }
 
+// ==================== D1 初始化（自动建表） ====================
+let dbInitialized = false;
+async function initDB(env) {
+    if (dbInitialized) return;
+    const db = env.DB;
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL,
+            nickname TEXT DEFAULT '',
+            status INTEGER DEFAULT 1,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            last_login_at DATETIME
+        );
+        CREATE TABLE IF NOT EXISTS card_keys (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            card_key TEXT NOT NULL UNIQUE,
+            type TEXT DEFAULT 'vip',
+            duration_days INTEGER DEFAULT 30,
+            status TEXT DEFAULT 'unused',
+            user_id INTEGER,
+            used_at DATETIME,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        );
+        CREATE TABLE IF NOT EXISTS conversations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            title TEXT DEFAULT '新对话',
+            messages TEXT DEFAULT '[]',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+        CREATE INDEX IF NOT EXISTS idx_card_keys_key ON card_keys(card_key);
+        CREATE INDEX IF NOT EXISTS idx_card_keys_user ON card_keys(user_id);
+        CREATE INDEX IF NOT EXISTS idx_card_keys_status ON card_keys(status);
+        CREATE INDEX IF NOT EXISTS idx_conv_user ON conversations(user_id);
+    `);
+    dbInitialized = true;
+}
+
 // ==================== 主路由 ====================
 export async function onRequest(context) {
     const { request, env } = context;
+    
+    // 首次请求时自动建表
+    await initDB(env);
+    
     const { path, params } = parseUrl(request.url);
     const method = request.method;
 
@@ -467,8 +515,11 @@ async function handleCreateConversation(request, env) {
     if (!userId) return jsonResponse({ error: '缺少用户ID' }, 400);
 
     const db = env.DB;
-    const result = await db.prepare('INSERT INTO conversations (user_id, title) VALUES (?, ?)').bind(userId, title || '新对话').run();
-    return jsonResponse({ id: result.meta.last_row_rowid, title: title || '新对话' });
+    await db.prepare('INSERT INTO conversations (user_id, title) VALUES (?, ?)').bind(userId, title || '新对话').run();
+    
+    // 查询刚创建的对话ID
+    const conv = await db.prepare('SELECT id, title FROM conversations WHERE user_id = ? ORDER BY id DESC LIMIT 1').bind(userId).first();
+    return jsonResponse({ id: conv.id, title: conv.title });
 }
 
 // ==================== 更新对话 ====================
