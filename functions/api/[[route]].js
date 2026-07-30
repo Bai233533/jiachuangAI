@@ -97,9 +97,6 @@ async function initDB(env) {
             effect_url TEXT DEFAULT '',
             ref_url TEXT DEFAULT '',
             author TEXT DEFAULT '嘉创',
-            uses TEXT DEFAULT '0',
-            likes INTEGER DEFAULT 0,
-            comments INTEGER DEFAULT 0,
             sort_order INTEGER DEFAULT 0,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP

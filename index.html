@@ -1243,11 +1243,6 @@
             margin-bottom: 4px;
         }
 
-        .template-card-uses {
-            font-size: 12px;
-            color: #999;
-        }
-
         /* ==================== 模版详情弹窗 ==================== */
         .template-detail-overlay {
             position: fixed;
@@ -1376,13 +1371,6 @@
             font-size: 12px;
             color: #999;
             margin-bottom: 8px;
-        }
-
-        .template-detail-stats {
-            display: flex;
-            gap: 16px;
-            font-size: 13px;
-            color: #666;
         }
 
         .template-detail-use-btn {
@@ -2115,12 +2103,6 @@
                 </div>
                 <div class="template-detail-meta">
                     <span id="templateDetailDate"></span>
-                    <span>·</span>
-                    <span id="templateDetailUses"></span>
-                </div>
-                <div class="template-detail-stats">
-                    <span>❤️ <span id="templateDetailLikes">0</span></span>
-                    <span>💬 <span id="templateDetailComments">0</span></span>
                 </div>
             </div>
         </div>
@@ -3523,15 +3505,11 @@
                 templateData = data.map(t => ({
                     id: t.id,
                     name: t.name,
-                    category: '',
                     prompt: t.prompt,
                     coverUrl: t.effect_url,
                     effectUrl: t.effect_url,
                     refThumbUrl: t.ref_url,
                     author: t.author || '嘉创',
-                    uses: t.uses || '0',
-                    likes: t.likes || 0,
-                    comments: t.comments || 0,
                     date: t.created_at ? t.created_at.split('T')[0].replace(/-/g, '/') : '',
                     refImages: []
                 }));
@@ -3566,7 +3544,6 @@
                 <img class="template-card-img" src="${t.effectUrl || t.coverUrl}" alt="${t.name}">
                 <div class="template-card-info">
                     <div class="template-card-name">${t.name}</div>
-                    <div class="template-card-uses">${t.uses}人使用</div>
                 </div>
             </div>
         `).join('');
@@ -3583,9 +3560,6 @@
         document.getElementById('templateDetailName').textContent = currentTemplate.name;
         document.getElementById('templateDetailDesc').textContent = currentTemplate.prompt;
         document.getElementById('templateDetailDate').textContent = currentTemplate.date;
-        document.getElementById('templateDetailUses').textContent = currentTemplate.uses + '人使用';
-        document.getElementById('templateDetailLikes').textContent = currentTemplate.likes;
-        document.getElementById('templateDetailComments').textContent = currentTemplate.comments;
         // 参考图缩略图
         const refThumb = document.getElementById('templateDetailRefThumb');
         const refImg = document.getElementById('templateDetailRefImg');
@@ -3903,15 +3877,11 @@
                     templateData.push({
                         id: data.id,
                         name: name,
-                        category: '',
                         prompt: prompt,
                         coverUrl: adminEffectDataUrl,
                         effectUrl: adminEffectDataUrl,
                         refThumbUrl: adminRefDataUrl || '',
                         author: '嘉创',
-                        uses: '0',
-                        likes: 0,
-                        comments: 0,
                         date: new Date().toLocaleDateString('zh-CN'),
                         refImages: []
                     });
