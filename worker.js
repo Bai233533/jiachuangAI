@@ -4,7 +4,7 @@
 const CHAT_MODEL = 'doubao-seed-2-1-pro-260628';
 const ARK_API_URL = 'https://ark.cn-beijing.volces.com/api/v3/responses';
 const IMAGE_API_URL = 'https://ark.cn-beijing.volces.com/api/v3/images/generations';
-const IMAGE_MODEL = 'doubao-seedream-5-0-260128';
+const IMAGE_MODEL = 'doubao-seedream-5-0-pro-260628';
 const DEFAULT_CHAT_PROMPT = '你是嘉创AI助手，一个智能且专业的AI助手。请用中文回答用户的问题。';
 
 /* ==================== CORS 工具 ==================== */

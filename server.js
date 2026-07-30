@@ -424,7 +424,7 @@ app.get('/api/health', (req, res) => {
 
 /* ==================== 图像生成 API ==================== */
 const IMAGE_API_URL = 'https://ark.cn-beijing.volces.com/api/v3/images/generations';
-const IMAGE_MODEL = 'doubao-seedream-5-0-260128';
+const IMAGE_MODEL = 'doubao-seedream-5-0-pro-260628';
 
 app.post('/api/generate-image', async (req, res) => {
     const { prompt, image, sequential, maxImages } = req.body;
