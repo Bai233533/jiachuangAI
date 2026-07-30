@@ -250,15 +250,18 @@ async function handleRegister(request, env) {
     const hash = await hashPassword(password, salt);
     const hashedPassword = salt + ':' + hash;
 
-    const result = await db.prepare(
+    await db.prepare(
         'INSERT INTO users (username, password, nickname) VALUES (?, ?, ?)'
     ).bind(username, hashedPassword, username).run();
 
-    const userId = result.meta.last_row_rowid;
+    // 查询刚注册的用户ID
+    const newUser = await db.prepare('SELECT id FROM users WHERE username = ?').bind(username).first();
+    const userId = newUser.id;
 
+    // 赠送1天VIP
     const freeTrialKey = 'FREE-' + username + '-' + Date.now();
     await db.prepare(
-        "INSERT INTO card_keys (card_key, type, duration_days, status, user_id, used_at) VALUES (?, 'vip', 1, 'used', ?, datetime('now'))"
+        "INSERT INTO card_keys (card_key, type, duration_days, status, user_id, used_at) VALUES (?, 'vip', 1, 'used', ?, datetime('now', 'localtime'))"
     ).bind(freeTrialKey, userId).run();
 
     return jsonResponse({
