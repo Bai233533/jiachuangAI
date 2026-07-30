@@ -2449,6 +2449,10 @@
             currentUser = JSON.parse(saved);
             isAdmin = localStorage.getItem('isAdmin') === 'true';
             updateUserUI();
+            // 管理员 id=0 说明是旧数据，重新登录获取真实 ID
+            if (isAdmin && currentUser.id === 0) {
+                refreshAdminId();
+            }
         }
         // 点击侧边栏底部触发登录/用户中心
         document.getElementById('sidebarFooter').onclick = function() {
@@ -2458,6 +2462,26 @@
                 openAuthModal();
             }
         };
+    }
+
+    async function refreshAdminId() {
+        try {
+            await fetch(API_BASE + '/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: ADMIN_USERNAME, password: ADMIN_PASSWORD })
+            }).catch(() => {});
+            const resp = await fetch(API_BASE + '/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: ADMIN_USERNAME, password: ADMIN_PASSWORD })
+            });
+            const data = await resp.json();
+            if (resp.ok && data.user) {
+                currentUser.id = data.user.id;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            }
+        } catch (e) {}
     }
 
     function openAuthModal() {
@@ -2725,9 +2749,31 @@
             return;
         }
 
-        // 管理员本地登录（无需后端）
+        // 管理员登录：先尝试注册到后端获取真实 ID
         if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-            currentUser = { id: 0, username: ADMIN_USERNAME, nickname: ADMIN_USERNAME, status: 1 };
+            try {
+                // 先尝试注册（若已存在则会报错，继续登录）
+                await fetch(API_BASE + '/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: ADMIN_USERNAME, password: ADMIN_PASSWORD })
+                }).catch(() => {});
+                // 登录获取真实用户 ID
+                const resp = await fetch(API_BASE + '/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: ADMIN_USERNAME, password: ADMIN_PASSWORD })
+                });
+                const data = await resp.json();
+                if (resp.ok && data.user) {
+                    currentUser = { id: data.user.id, username: ADMIN_USERNAME, nickname: ADMIN_USERNAME, status: 1 };
+                } else {
+                    // 后端不可用时降级为本地模式
+                    currentUser = { id: 0, username: ADMIN_USERNAME, nickname: ADMIN_USERNAME, status: 1 };
+                }
+            } catch (e) {
+                currentUser = { id: 0, username: ADMIN_USERNAME, nickname: ADMIN_USERNAME, status: 1 };
+            }
             isAdmin = true;
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
             localStorage.setItem('isAdmin', 'true');
