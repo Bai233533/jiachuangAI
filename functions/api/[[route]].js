@@ -287,7 +287,7 @@ async function handleGenerateImage(request, env) {
     let body;
     try { body = await request.json(); } catch { return jsonResponse({ error: '请求格式错误' }, 400); }
 
-    const { prompt, image, sequential, maxImages } = body;
+    const { prompt, image } = body;
     if (!prompt) return jsonResponse({ error: '请输入图像描述' }, 400);
 
     const apiKey = env.ARK_API_KEY;
@@ -299,12 +299,6 @@ async function handleGenerateImage(request, env) {
             stream: false, watermark: true,
         };
         if (image) requestBody.image = image;
-        if (sequential === 'auto') {
-            requestBody.sequential_image_generation = 'auto';
-            requestBody.sequential_image_generation_options = { max_images: maxImages || 4 };
-        } else {
-            requestBody.sequential_image_generation = 'disabled';
-        }
 
         const response = await fetch(IMAGE_API_URL, {
             method: 'POST',

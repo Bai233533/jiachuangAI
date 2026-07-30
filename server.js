@@ -427,7 +427,7 @@ const IMAGE_API_URL = 'https://ark.cn-beijing.volces.com/api/v3/images/generatio
 const IMAGE_MODEL = 'doubao-seedream-5-0-pro-260628';
 
 app.post('/api/generate-image', async (req, res) => {
-    const { prompt, image, sequential, maxImages } = req.body;
+    const { prompt, image } = req.body;
 
     if (!prompt) {
         return res.status(400).json({ error: '请输入图像描述' });
@@ -448,17 +448,7 @@ app.post('/api/generate-image', async (req, res) => {
             requestBody.image = image;
         }
 
-        // 组图生成模式
-        if (sequential === 'auto') {
-            requestBody.sequential_image_generation = 'auto';
-            requestBody.sequential_image_generation_options = {
-                max_images: maxImages || 4
-            };
-        } else {
-            requestBody.sequential_image_generation = 'disabled';
-        }
-
-        console.log('图像生成请求:', JSON.stringify({ prompt: prompt.slice(0, 50), hasImage: !!image, sequential: sequential || 'disabled' }));
+        console.log('图像生成请求:', JSON.stringify({ prompt: prompt.slice(0, 50), hasImage: !!image }));
 
         const response = await fetch(IMAGE_API_URL, {
             method: 'POST',
