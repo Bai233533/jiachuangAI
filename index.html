@@ -2293,6 +2293,7 @@
         }
 
         const targetConvId = currentConversationId;
+        if (!targetConvId) { showToast('对话创建失败，请重试'); return; }
         hideWelcome();
 
         // 构造用户消息文本（含上传图提示）
