@@ -137,6 +137,32 @@ async function handleRequest(request, env, ctx) {
         return handleDeleteConversation(request, env, convMatch[1]);
     }
 
+    // ---------- 获取所有模板 ----------
+    if (method === 'GET' && path === '/api/templates') {
+        return handleGetTemplates(env);
+    }
+
+    // ---------- 获取单个模板 ----------
+    const tplMatch = path.match(/^\/api\/templates\/(\d+)$/);
+    if (method === 'GET' && tplMatch) {
+        return handleGetTemplate(env, tplMatch[1]);
+    }
+
+    // ---------- 创建模板 ----------
+    if (method === 'POST' && path === '/api/templates') {
+        return handleCreateTemplate(request, env);
+    }
+
+    // ---------- 更新模板 ----------
+    if (method === 'PUT' && tplMatch) {
+        return handleUpdateTemplate(request, env, tplMatch[1]);
+    }
+
+    // ---------- 删除模板 ----------
+    if (method === 'DELETE' && tplMatch) {
+        return handleDeleteTemplate(env, tplMatch[1]);
+    }
+
     // ---------- 兜底 ----------
     return jsonResponse({ error: '接口不存在' }, 404);
 }
@@ -708,6 +734,57 @@ async function handleDeleteConversation(request, env, id) {
     return jsonResponse({ success: true });
 }
 
+/* ==================== 模板 CRUD ==================== */
+async function handleGetTemplates(env) {
+    const db = env.DB;
+    const { results } = await db.prepare('SELECT * FROM templates ORDER BY sort_order ASC, id ASC').all();
+    return jsonResponse(results);
+}
+
+async function handleGetTemplate(env, id) {
+    const db = env.DB;
+    const row = await db.prepare('SELECT * FROM templates WHERE id = ?').bind(id).first();
+    if (!row) return jsonResponse({ error: '模板不存在' }, 404);
+    return jsonResponse(row);
+}
+
+async function handleCreateTemplate(request, env) {
+    let body;
+    try { body = await request.json(); } catch { return jsonResponse({ error: '请求格式错误' }, 400); }
+    const { name, prompt, effect_url, ref_url } = body;
+    if (!name || !prompt) return jsonResponse({ error: '名称和提示词必填' }, 400);
+    const db = env.DB;
+    const info = await db.prepare(
+        'INSERT INTO templates (name, prompt, effect_url, ref_url) VALUES (?, ?, ?, ?)'
+    ).bind(name, prompt, effect_url || '', ref_url || '').run();
+    return jsonResponse({ id: info.meta.last_row_id });
+}
+
+async function handleUpdateTemplate(request, env, id) {
+    let body;
+    try { body = await request.json(); } catch { return jsonResponse({ error: '请求格式错误' }, 400); }
+    const db = env.DB;
+    const existing = await db.prepare('SELECT * FROM templates WHERE id = ?').bind(id).first();
+    if (!existing) return jsonResponse({ error: '模板不存在' }, 404);
+    await db.prepare(
+        'UPDATE templates SET name=?, prompt=?, effect_url=?, ref_url=?, sort_order=?, updated_at=CURRENT_TIMESTAMP WHERE id=?'
+    ).bind(
+        body.name ?? existing.name,
+        body.prompt ?? existing.prompt,
+        body.effect_url ?? existing.effect_url,
+        body.ref_url ?? existing.ref_url,
+        body.sort_order ?? existing.sort_order,
+        id
+    ).run();
+    return jsonResponse({ success: true });
+}
+
+async function handleDeleteTemplate(env, id) {
+    const db = env.DB;
+    await db.prepare('DELETE FROM templates WHERE id = ?').bind(id).run();
+    return jsonResponse({ success: true });
+}
+
 /* ==================== D1 初始化（可选：建表） ==================== */
 async function initDB(env) {
     const db = env.DB;
@@ -749,6 +826,23 @@ async function initDB(env) {
         CREATE INDEX IF NOT EXISTS idx_card_keys_user ON card_keys(user_id);
         CREATE INDEX IF NOT EXISTS idx_card_keys_status ON card_keys(status);
         CREATE INDEX IF NOT EXISTS idx_conv_user ON conversations(user_id);
+
+        CREATE TABLE IF NOT EXISTS templates (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            prompt TEXT NOT NULL DEFAULT '',
+            effect_url TEXT DEFAULT '',
+            ref_url TEXT DEFAULT '',
+            author TEXT DEFAULT '嘉创',
+            uses TEXT DEFAULT '0',
+            likes INTEGER DEFAULT 0,
+            comments INTEGER DEFAULT 0,
+            sort_order INTEGER DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_tpl_sort ON templates(sort_order);
     `);
 }
 

@@ -3486,103 +3486,43 @@
 
     /* ==================== AI创作模版中心 ==================== */
     // 模版数据（管理员可动态修改）
-    let templateData = [
-        {
-            id: 1,
-            name: 'Y2K复古辣妹',
-            category: '人像',
-            prompt: 'Y2K复古日系辣妹风格的潮流写真图，中间靠右是图中女生，梳着长双马尾发型，她戴着耳机，穿着黑色T恤，T恤上有蝴蝶图案，搭配黑色短裙，整体风格酷炫时尚，背景带有日文涂鸦和棋盘格元素。',
-            coverUrl: 'https://picsum.photos/seed/t1/400/540',
-            effectUrl: 'https://picsum.photos/seed/t1e/400/540',
-            refThumbUrl: 'https://picsum.photos/seed/t1r/600/600',
-            author: '嘉创',
-            uses: '2.1万',
-            likes: 811,
-            comments: 53,
-            date: '2025/9/29',
-            refImages: []
-        },
-        {
-            id: 2,
-            name: '海边日落剪影',
-            category: '风景',
-            prompt: '海边日落时分的唯美剪影风格照片，金色阳光洒在海面上，天空呈现渐变的橙红色，人物站在海边形成美丽的剪影效果，浪花轻拍沙滩。',
-            coverUrl: 'https://picsum.photos/seed/t2/400/540',
-            effectUrl: 'https://picsum.photos/seed/t2e/400/540',
-            refThumbUrl: 'https://picsum.photos/seed/t2r/600/600',
-            author: '嘉创',
-            uses: '5.5万',
-            likes: 1203,
-            comments: 89,
-            date: '2025/8/15',
-            refImages: []
-        },
-        {
-            id: 3,
-            name: '水下光影人像',
-            category: '创意',
-            prompt: '水下光影人像摄影风格，女生在清澈的水中，光线从水面透射下来形成美丽的光斑，头发在水中飘散，整体氛围梦幻唯美，鱼群在周围游动。',
-            coverUrl: 'https://picsum.photos/seed/t3/400/540',
-            effectUrl: 'https://picsum.photos/seed/t3e/400/540',
-            refThumbUrl: 'https://picsum.photos/seed/t3r/600/600',
-            author: '嘉创',
-            uses: '5.6万',
-            likes: 987,
-            comments: 67,
-            date: '2025/7/20',
-            refImages: []
-        },
-        {
-            id: 4,
-            name: '樱花动漫少女',
-            category: '二次元',
-            prompt: '日系二次元樱花少女风格，精致的动漫画风，粉色樱花花瓣飘落，少女穿着 JK 制服，长发飘飘，背景是樱花盛开的校园，色彩柔和梦幻。',
-            coverUrl: 'https://picsum.photos/seed/t4/400/540',
-            effectUrl: 'https://picsum.photos/seed/t4e/400/540',
-            refThumbUrl: 'https://picsum.photos/seed/t4r/600/600',
-            author: '嘉创',
-            uses: '3.2万',
-            likes: 1567,
-            comments: 112,
-            date: '2025/6/10',
-            refImages: []
-        },
-        {
-            id: 5,
-            name: '赛博朋克城市',
-            category: '风格化',
-            prompt: '赛博朋克风格的未来城市夜景，霓虹灯光映照在雨湿的街道上，高楼大厦林立，全息广告牌闪烁，整体色调偏蓝紫色调，充满科技感。',
-            coverUrl: 'https://picsum.photos/seed/t5/400/540',
-            effectUrl: 'https://picsum.photos/seed/t5e/400/540',
-            refThumbUrl: 'https://picsum.photos/seed/t5r/600/600',
-            author: '嘉创',
-            uses: '4.8万',
-            likes: 2034,
-            comments: 156,
-            date: '2025/5/18',
-            refImages: []
-        },
-        {
-            id: 6,
-            name: '油画风肖像',
-            category: '风格化',
-            prompt: '经典油画风格的肖像画，模仿文艺复兴时期的绘画技法，暖色调光影，人物面部轮廓清晰，皮肤质感细腻，背景是深色的古典氛围。',
-            coverUrl: 'https://picsum.photos/seed/t6/400/540',
-            effectUrl: 'https://picsum.photos/seed/t6e/400/540',
-            refThumbUrl: 'https://picsum.photos/seed/t6r/600/600',
-            author: '嘉创',
-            uses: '1.8万',
-            likes: 678,
-            comments: 45,
-            date: '2025/4/22',
-            refImages: []
-        }
-    ];
+    let templateData = [];
 
     let currentTemplate = null;
     let templateRefImageUrls = [];
 
+    // 从 API 加载模板数据
+    async function loadTemplates() {
+        try {
+            const resp = await fetch(API_BASE + '/api/templates');
+            if (resp.ok) {
+                const data = await resp.json();
+                templateData = data.map(t => ({
+                    id: t.id,
+                    name: t.name,
+                    category: '',
+                    prompt: t.prompt,
+                    coverUrl: t.effect_url,
+                    effectUrl: t.effect_url,
+                    refThumbUrl: t.ref_url,
+                    author: t.author || '嘉创',
+                    uses: t.uses || '0',
+                    likes: t.likes || 0,
+                    comments: t.comments || 0,
+                    date: t.created_at ? t.created_at.split('T')[0].replace(/-/g, '/') : '',
+                    refImages: []
+                }));
+            }
+        } catch (e) {
+            console.warn('加载模板失败，使用空列表', e);
+        }
+    }
+
     function showTemplateView() {
+        // 从数据库加载最新模板
+        loadTemplates().then(() => {
+            renderTemplates();
+        });
         document.getElementById('templateView').style.display = 'flex';
         document.getElementById('templateCreateView').style.display = 'none';
         document.querySelector('.main-content').style.display = 'none';
@@ -3745,11 +3685,12 @@
     document.querySelector('.menu-item').onclick = function() { showTemplateView(); };
 
     /* ==================== 模板管理（管理员） ==================== */
-    function openAdminView() {
+    async function openAdminView() {
         if (!isAdmin) return;
         document.getElementById('adminView').style.display = 'flex';
         document.querySelector('.main-content').style.display = 'none';
         document.querySelector('.sidebar').style.display = 'none';
+        await loadTemplates();
         renderAdminTable();
     }
 
@@ -3871,16 +3812,19 @@
         openAdminForm(id);
     }
 
-    function deleteTemplate(id) {
+    async function deleteTemplate(id) {
         const t = templateData.find(x => x.id === id);
         if (!t) return;
         if (!confirm('确定删除模板「' + t.name + '」？此操作不可撤销。')) return;
+        try {
+            await fetch(API_BASE + '/api/templates/' + id, { method: 'DELETE' });
+        } catch (e) {}
         templateData = templateData.filter(x => x.id !== id);
         renderAdminTable();
         showToast('模板已删除');
     }
 
-    function saveAdminForm() {
+    async function saveAdminForm() {
         const editId = document.getElementById('adminFormEditId').value;
         const name = document.getElementById('adminFormName').value.trim();
         const prompt = document.getElementById('adminFormPrompt').value.trim();
@@ -3895,7 +3839,20 @@
         }
 
         if (editId) {
-            // 编辑
+            // 编辑 - 调用 API 更新
+            try {
+                await fetch(API_BASE + '/api/templates/' + editId, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name,
+                        prompt,
+                        effect_url: adminEffectDataUrl,
+                        ref_url: adminRefDataUrl || ''
+                    })
+                });
+            } catch (e) {}
+            // 更新本地数据
             const t = templateData.find(x => x.id === parseInt(editId));
             if (t) {
                 t.name = name;
@@ -3906,23 +3863,40 @@
             }
             showToast('模板已更新');
         } else {
-            // 新增
-            const newId = templateData.length > 0 ? Math.max(...templateData.map(x => x.id)) + 1 : 1;
-            templateData.push({
-                id: newId,
-                name: name,
-                category: '',
-                prompt: prompt,
-                coverUrl: adminEffectDataUrl,
-                effectUrl: adminEffectDataUrl,
-                refThumbUrl: adminRefDataUrl || '',
-                author: '嘉创',
-                uses: '0',
-                likes: 0,
-                comments: 0,
-                date: new Date().toLocaleDateString('zh-CN'),
-                refImages: []
-            });
+            // 新增 - 调用 API 创建
+            try {
+                const resp = await fetch(API_BASE + '/api/templates', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name,
+                        prompt,
+                        effect_url: adminEffectDataUrl,
+                        ref_url: adminRefDataUrl || ''
+                    })
+                });
+                const data = await resp.json();
+                if (data.id) {
+                    templateData.push({
+                        id: data.id,
+                        name: name,
+                        category: '',
+                        prompt: prompt,
+                        coverUrl: adminEffectDataUrl,
+                        effectUrl: adminEffectDataUrl,
+                        refThumbUrl: adminRefDataUrl || '',
+                        author: '嘉创',
+                        uses: '0',
+                        likes: 0,
+                        comments: 0,
+                        date: new Date().toLocaleDateString('zh-CN'),
+                        refImages: []
+                    });
+                }
+            } catch (e) {
+                showToast('创建失败，请检查网络');
+                return;
+            }
             showToast('模板已新增');
         }
 

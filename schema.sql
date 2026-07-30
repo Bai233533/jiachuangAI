@@ -44,3 +44,22 @@ CREATE TABLE IF NOT EXISTS conversations (
 
 -- 对话表索引
 CREATE INDEX IF NOT EXISTS idx_conv_user ON conversations(user_id);
+
+-- 模板表
+CREATE TABLE IF NOT EXISTS templates (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,                       -- 模板名称
+    prompt TEXT NOT NULL DEFAULT '',           -- 提示词内容
+    effect_url TEXT DEFAULT '',               -- 效果图URL/Base64
+    ref_url TEXT DEFAULT '',                  -- 参考图URL/Base64
+    author TEXT DEFAULT '嘉创',               -- 作者
+    uses TEXT DEFAULT '0',                    -- 使用人数
+    likes INTEGER DEFAULT 0,                 -- 点赞数
+    comments INTEGER DEFAULT 0,              -- 评论数
+    sort_order INTEGER DEFAULT 0,            -- 排序权重
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,  -- 创建日期
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP   -- 编辑日期
+);
+
+-- 模板表索引
+CREATE INDEX IF NOT EXISTS idx_tpl_sort ON templates(sort_order);

@@ -491,6 +491,55 @@ app.post('/api/generate-image', async (req, res) => {
     }
 });
 
+/* ==================== 模板 CRUD API ==================== */
+
+// 获取所有模板
+app.get('/api/templates', (req, res) => {
+    const rows = db.prepare('SELECT * FROM templates ORDER BY sort_order ASC, id ASC').all();
+    res.json(rows);
+});
+
+// 获取单个模板
+app.get('/api/templates/:id', (req, res) => {
+    const row = db.prepare('SELECT * FROM templates WHERE id = ?').get(req.params.id);
+    if (!row) return res.status(404).json({ error: '模板不存在' });
+    res.json(row);
+});
+
+// 新增模板
+app.post('/api/templates', (req, res) => {
+    const { name, prompt, effect_url, ref_url } = req.body;
+    if (!name || !prompt) return res.status(400).json({ error: '名称和提示词必填' });
+    const info = db.prepare(
+        'INSERT INTO templates (name, prompt, effect_url, ref_url) VALUES (?, ?, ?, ?)'
+    ).run(name, prompt, effect_url || '', ref_url || '');
+    res.json({ id: info.lastInsertRowid });
+});
+
+// 更新模板
+app.put('/api/templates/:id', (req, res) => {
+    const { name, prompt, effect_url, ref_url, sort_order } = req.body;
+    const existing = db.prepare('SELECT * FROM templates WHERE id = ?').get(req.params.id);
+    if (!existing) return res.status(404).json({ error: '模板不存在' });
+    db.prepare(
+        'UPDATE templates SET name=?, prompt=?, effect_url=?, ref_url=?, sort_order=?, updated_at=CURRENT_TIMESTAMP WHERE id=?'
+    ).run(
+        name ?? existing.name,
+        prompt ?? existing.prompt,
+        effect_url ?? existing.effect_url,
+        ref_url ?? existing.ref_url,
+        sort_order ?? existing.sort_order,
+        req.params.id
+    );
+    res.json({ success: true });
+});
+
+// 删除模板
+app.delete('/api/templates/:id', (req, res) => {
+    db.prepare('DELETE FROM templates WHERE id = ?').run(req.params.id);
+    res.json({ success: true });
+});
+
 /* ==================== 兜底：返回 index.html ==================== */
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
