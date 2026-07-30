@@ -2991,17 +2991,37 @@
             showToast('请选择图片文件');
             return;
         }
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            uploadedImageBase64 = e.target.result;
-            document.getElementById('uploadPreviewImg').src = uploadedImageBase64;
+        compressImage(file, 1024).then(function(base64) {
+            uploadedImageBase64 = base64;
+            document.getElementById('uploadPreviewImg').src = base64;
             document.getElementById('uploadPreview').style.display = 'flex';
-            // 上传图片时自动开启图像生成模式
             if (!isImageGenMode) toggleImageGen();
-        };
-        reader.readAsDataURL(file);
-        // 重置 input 以便重复选择同一文件
+        });
         event.target.value = '';
+    }
+
+    // 图片压缩：限制最大边长，降低质量，确保 API 可处理
+    function compressImage(file, maxSize) {
+        return new Promise(function(resolve) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var img = new Image();
+                img.onload = function() {
+                    var w = img.width, h = img.height;
+                    if (w > maxSize || h > maxSize) {
+                        if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
+                        else { w = Math.round(w * maxSize / h); h = maxSize; }
+                    }
+                    var canvas = document.createElement('canvas');
+                    canvas.width = w;
+                    canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    resolve(canvas.toDataURL('image/jpeg', 0.85));
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
     }
 
     function clearUpload() {
@@ -3205,13 +3225,16 @@
         if (!targetConvId) { showToast('对话创建失败，请重试'); return; }
         hideWelcome();
 
+        // 先保存图片到局部变量，防止 clearUpload() 清空
+        const refImage = uploadedImageBase64;
+
         // 构造用户消息（含参考图）
         const msgList = document.getElementById('messageList');
         const div = document.createElement('div');
         div.className = 'message user';
         let bubbleHtml = simpleMarkdown(prompt);
-        if (uploadedImageBase64) {
-            bubbleHtml = '<img src="' + uploadedImageBase64 + '" style="max-width:240px;border-radius:8px;margin-bottom:8px;display:block;">' + bubbleHtml;
+        if (refImage) {
+            bubbleHtml = '<img src="' + refImage + '" style="max-width:240px;border-radius:8px;margin-bottom:8px;display:block;">' + bubbleHtml;
         }
         div.innerHTML = '<div class="message-avatar">白</div><div class="message-bubble">' + bubbleHtml + '</div>';
         msgList.appendChild(div);
@@ -3219,7 +3242,7 @@
 
         // 构造保存文本
         let userMsgText = prompt;
-        if (uploadedImageBase64) {
+        if (refImage) {
             userMsgText = '[含参考图] ' + prompt;
         }
         document.getElementById('userInput').value = '';
@@ -3255,8 +3278,8 @@
             };
 
             // 如果有上传的参考图
-            if (uploadedImageBase64) {
-                body.image = uploadedImageBase64;
+            if (refImage) {
+                body.image = refImage;
             }
 
             const response = await fetch(API_BASE + '/api/generate-image', {
