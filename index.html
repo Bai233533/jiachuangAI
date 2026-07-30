@@ -2248,20 +2248,24 @@
 
             // 始终保存到正确的目标对话
             if (fullText) {
-                const convList = await getConversations();
-                const targetConv = convList.find(c => c.id == targetConvId);
-                if (targetConv) {
-                    const targetMessages = targetConv.messages || [];
-                    targetMessages.push({
-                        role: 'assistant',
-                        content: fullText
-                    });
-                    updateConversation(targetConvId, { messages: targetMessages });
+                // 获取完整对话消息（列表接口不含messages）
+                let targetMessages = [];
+                try {
+                    const fullResp = await fetch(API_BASE + '/api/conversations/' + targetConvId + '?userId=' + currentUser.id);
+                    const fullData = await fullResp.json();
+                    targetMessages = fullData.messages || [];
+                } catch(e) {
+                    targetMessages = [...conversationHistory];
+                }
+                targetMessages.push({
+                    role: 'assistant',
+                    content: fullText
+                });
+                updateConversation(targetConvId, { messages: targetMessages });
 
-                    // 如果用户切回了这个对话，同步内存中的 conversationHistory
-                    if (currentConversationId === targetConvId) {
-                        conversationHistory = targetMessages;
-                    }
+                // 如果用户切回了这个对话，同步内存中的 conversationHistory
+                if (currentConversationId === targetConvId) {
+                    conversationHistory = targetMessages;
                 }
             } else if (bubble) {
                 bubble.innerHTML = '<span style="color:#999;">未收到回复，请重试。</span>';
@@ -2392,18 +2396,21 @@
 
             // 保存 AI 回复
             if (result.images && result.images.length > 0) {
-                const convList2 = await getConversations();
-                const targetConv = convList2.find(c => c.id == targetConvId);
-                if (targetConv) {
-                    const targetMessages = targetConv.messages || [];
-                    targetMessages.push({
-                        role: 'assistant',
-                        content: '[图像生成] ' + prompt + '\n' + result.images.join('\n')
-                    });
-                    updateConversation(targetConvId, { messages: targetMessages });
-                    if (currentConversationId === targetConvId) {
-                        conversationHistory = targetMessages;
-                    }
+                let targetMessages = [];
+                try {
+                    const fullResp2 = await fetch(API_BASE + '/api/conversations/' + targetConvId + '?userId=' + currentUser.id);
+                    const fullData2 = await fullResp2.json();
+                    targetMessages = fullData2.messages || [];
+                } catch(e) {
+                    targetMessages = [...conversationHistory];
+                }
+                targetMessages.push({
+                    role: 'assistant',
+                    content: '[图像生成] ' + prompt + '\n' + result.images.join('\n')
+                });
+                updateConversation(targetConvId, { messages: targetMessages });
+                if (currentConversationId === targetConvId) {
+                    conversationHistory = targetMessages;
                 }
             }
 
