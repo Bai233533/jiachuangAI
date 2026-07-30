@@ -404,7 +404,7 @@ async function handleGenerateCard(request, env) {
     try { body = await request.json(); } catch { return jsonResponse({ error: '请求格式错误' }, 400); }
 
     const { adminSecret, type, durationDays, count } = body;
-    if (adminSecret !== 'jiachuang-admin-2024') return jsonResponse({ error: '管理员密钥错误' }, 403);
+    if (adminSecret !== '233') return jsonResponse({ error: '管理员密钥错误' }, 403);
 
     const db = env.DB;
     const num = Math.min(count || 1, 100);

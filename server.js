@@ -250,7 +250,7 @@ app.post('/api/auth/generate-card', (req, res) => {
     const { adminSecret, type, durationDays, count } = req.body;
 
     // 简单的管理员密钥验证
-    if (adminSecret !== 'jiachuang-admin-2024') {
+    if (adminSecret !== '233') {
         return res.status(403).json({ error: '管理员密钥错误' });
     }
 
