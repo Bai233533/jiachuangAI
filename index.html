@@ -3028,6 +3028,9 @@
             return;
         }
 
+        // 清空可能残留的上传预览
+        clearUpload();
+
         // 如果没有当前对话，创建一个
         if (!currentConversationId) {
             if (!currentUser) { showToast('请先登录'); return; }
@@ -3202,13 +3205,27 @@
         if (!targetConvId) { showToast('对话创建失败，请重试'); return; }
         hideWelcome();
 
-        // 构造用户消息文本（含上传图提示）
+        // 构造用户消息（含参考图）
+        const msgList = document.getElementById('messageList');
+        const div = document.createElement('div');
+        div.className = 'message user';
+        let bubbleHtml = simpleMarkdown(prompt);
+        if (uploadedImageBase64) {
+            bubbleHtml = '<img src="' + uploadedImageBase64 + '" style="max-width:240px;border-radius:8px;margin-bottom:8px;display:block;">' + bubbleHtml;
+        }
+        div.innerHTML = '<div class="message-avatar">白</div><div class="message-bubble">' + bubbleHtml + '</div>';
+        msgList.appendChild(div);
+        scrollToBottom();
+
+        // 构造保存文本
         let userMsgText = prompt;
         if (uploadedImageBase64) {
             userMsgText = '[含参考图] ' + prompt;
         }
-        addUserMessage(userMsgText);
         document.getElementById('userInput').value = '';
+
+        // 清空上传预览
+        clearUpload();
 
         // 保存用户消息
         conversationHistory.push({
