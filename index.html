@@ -1144,6 +1144,707 @@
             opacity: 1;
             transform: translateX(-50%) translateY(0);
         }
+
+        /* ==================== AI创作模版中心 ==================== */
+        .template-view {
+            position: fixed;
+            top: 0;
+            left: 280px;
+            right: 0;
+            bottom: 0;
+            background: #f5f5f9;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .template-gallery {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 30px;
+        }
+
+        .template-categories {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .template-cat {
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+            background: #fff;
+            color: #666;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .template-cat:hover {
+            border-color: #6c5ce7;
+            color: #6c5ce7;
+        }
+
+        .template-cat.active {
+            background: #6c5ce7;
+            color: #fff;
+            border-color: #6c5ce7;
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .template-card {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+
+        .template-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+
+        .template-card-img {
+            width: 100%;
+            aspect-ratio: 3/4;
+            object-fit: cover;
+            display: block;
+        }
+
+        .template-card-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(108,92,231,0.85);
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            backdrop-filter: blur(4px);
+        }
+
+        .template-card-info {
+            padding: 12px 14px;
+        }
+
+        .template-card-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .template-card-uses {
+            font-size: 12px;
+            color: #999;
+        }
+
+        /* ==================== 模版详情弹窗 ==================== */
+        .template-detail-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 200;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .template-detail-overlay.show {
+            display: flex;
+        }
+
+        .template-detail-modal {
+            background: #fff;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 480px;
+            max-height: 85vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .template-detail-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(0,0,0,0.4);
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .template-detail-content {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .template-detail-hero {
+            width: 100%;
+            background: #f0f0f0;
+        }
+
+        .template-detail-hero img {
+            width: 100%;
+            display: block;
+        }
+
+        .template-detail-info {
+            padding: 20px;
+        }
+
+        .template-detail-author {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .template-detail-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #6c5ce7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .template-detail-info h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .template-detail-desc-box {
+            background: #f7f7f9;
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .template-detail-desc-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .template-detail-ref-thumb {
+            margin-bottom: 12px;
+        }
+
+        .template-detail-ref-thumb img {
+            width: 56px;
+            height: 56px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid #eee;
+        }
+
+        .template-detail-meta {
+            display: flex;
+            gap: 8px;
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 8px;
+        }
+
+        .template-detail-stats {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .template-detail-use-btn {
+            width: 100%;
+            padding: 14px;
+            background: #6c5ce7;
+            color: #fff;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .template-detail-use-btn:hover {
+            background: #5a4bd1;
+        }
+
+        /* ==================== 模版创作页面 ==================== */
+        .template-create-view {
+            position: fixed;
+            top: 0;
+            left: 280px;
+            right: 0;
+            bottom: 0;
+            background: #f5f5f9;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .template-create-body {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            overflow-y: auto;
+            padding: 30px;
+        }
+
+        .template-create-card {
+            width: 100%;
+            max-width: 780px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .template-create-section {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+        }
+
+        .template-create-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .template-create-prompt {
+            width: 100%;
+            min-height: 160px;
+            padding: 14px 16px;
+            border: 1px solid #e0e0e8;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.7;
+            resize: vertical;
+            font-family: inherit;
+            color: #333;
+            background: #fafafa;
+        }
+
+        .template-create-prompt:focus {
+            outline: none;
+            border-color: #6c5ce7;
+            box-shadow: 0 0 0 3px rgba(108,92,231,0.1);
+            background: #fff;
+        }
+
+        .template-ref-images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .template-ref-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            width: 100px;
+            height: 100px;
+        }
+
+        .template-ref-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .template-ref-remove {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(0,0,0,0.5);
+            color: #fff;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .template-add-ref-btn {
+            padding: 12px 20px;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            background: transparent;
+            color: #999;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .template-add-ref-btn:hover {
+            border-color: #6c5ce7;
+            color: #6c5ce7;
+        }
+
+        .template-start-btn-lg {
+            width: 100%;
+            padding: 16px 0;
+            background: linear-gradient(135deg, #6c5ce7, #4f6ef7);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 16px rgba(79,110,247,0.3);
+        }
+
+        .template-start-btn-lg:hover {
+            background: linear-gradient(135deg, #5a4bd1, #3d5bd9);
+            box-shadow: 0 6px 20px rgba(79,110,247,0.4);
+            transform: translateY(-1px);
+        }
+
+        .template-start-btn-lg:active {
+            transform: translateY(0);
+        }
+
+        .template-start-btn:active {
+            background: #5a4bd1;
+        }
+
+        /* ==================== 模板管理页面 ==================== */
+        .admin-view {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #f5f5f9;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .admin-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 40px;
+        }
+
+        .admin-table-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+
+        .admin-table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .admin-table-header h2 {
+            font-size: 18px;
+            color: #333;
+        }
+
+        .admin-add-btn {
+            padding: 10px 24px;
+            background: #4f6ef7;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .admin-add-btn:hover {
+            background: #3d5bd9;
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .admin-table th {
+            text-align: left;
+            padding: 12px 16px;
+            background: #f8f8fb;
+            font-size: 13px;
+            color: #666;
+            font-weight: 600;
+            border-bottom: 2px solid #eee;
+        }
+
+        .admin-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #f0f0f5;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .admin-table tr:hover td {
+            background: #fafaff;
+        }
+
+        .admin-table .col-name {
+            max-width: 180px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .admin-table .col-category {
+            color: #6c5ce7;
+            font-weight: 500;
+        }
+
+        .admin-table .col-prompt {
+            max-width: 320px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #888;
+            font-size: 13px;
+        }
+
+        .admin-table .col-actions {
+            display: flex;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .admin-action-btn {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .admin-action-btn.edit {
+            background: #eef0ff;
+            color: #4f6ef7;
+        }
+
+        .admin-action-btn.edit:hover {
+            background: #dde2ff;
+        }
+
+        .admin-action-btn.del {
+            background: #fff0f0;
+            color: #e74c3c;
+        }
+
+        .admin-action-btn.del:hover {
+            background: #ffe0e0;
+        }
+
+        /* 模板编辑弹窗 */
+        .admin-form-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 300;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .admin-form-overlay.show {
+            display: flex;
+        }
+
+        .admin-form-modal {
+            background: #fff;
+            border-radius: 16px;
+            padding: 32px;
+            width: 560px;
+            max-width: 90vw;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            position: relative;
+        }
+
+        .admin-form-modal h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 24px;
+        }
+
+        .admin-form-field {
+            margin-bottom: 16px;
+        }
+
+        .admin-form-field label {
+            display: block;
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .admin-form-field input,
+        .admin-form-field textarea,
+        .admin-form-field select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #e0e0e8;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #333;
+            background: #fafafa;
+            outline: none;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+
+        .admin-form-field input:focus,
+        .admin-form-field textarea:focus,
+        .admin-form-field select:focus {
+            border-color: #4f6ef7;
+            background: #fff;
+        }
+
+        .admin-form-field textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .admin-form-btns {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+
+        .admin-form-btns .btn-cancel {
+            padding: 10px 24px;
+            background: #f0f0f5;
+            color: #555;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .admin-form-btns .btn-cancel:hover {
+            background: #e0e0e8;
+        }
+
+        .admin-form-btns .btn-save {
+            padding: 10px 24px;
+            background: #4f6ef7;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .admin-form-btns .btn-save:hover {
+            background: #3d5bd9;
+        }
+
+        .admin-empty {
+            text-align: center;
+            padding: 40px 0;
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        .admin-upload-box {
+            width: 100%;
+            min-height: 120px;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .admin-upload-box:hover {
+            border-color: #4f6ef7;
+            background: #fafaff;
+        }
+
+        .admin-upload-img {
+            width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .admin-upload-hint {
+            color: #aaa;
+            font-size: 14px;
+            pointer-events: none;
+        }
+
+        .admin-table .col-thumb {
+            width: 56px;
+        }
+
+        .admin-table .col-thumb img {
+            width: 48px;
+            height: 48px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid #eee;
+        }
     </style>
 </head>
 <body>
@@ -1182,9 +1883,13 @@
 
         <!-- 菜单项 -->
         <nav class="sidebar-menu">
-            <div class="menu-item" onclick="showToast('AI创作功能开发中')">
+            <div class="menu-item" onclick="showTemplateView()">
                 <img src="嘉创AI头像.png" alt="嘉创AI" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover;">
                 <span>AI 创作</span>
+            </div>
+            <div class="menu-item" id="adminMenuBtn" style="display:none;" onclick="openAdminView()">
+                <span class="menu-icon">⚙️</span>
+                <span>模板管理</span>
             </div>
         </nav>
 
@@ -1377,6 +2082,129 @@
 
 <!-- Toast 提示 -->
 <div class="toast" id="toast"></div>
+
+<!-- ==================== AI创作模版中心 ==================== -->
+<div class="template-view" id="templateView" style="display:none;">
+    <header class="top-bar">
+        <button class="action-btn" onclick="closeTemplateView()" title="返回对话">←</button>
+        <span class="top-bar-title">AI 创作</span>
+        <div class="top-bar-actions"></div>
+    </header>
+    <div class="template-gallery">
+        <!-- 模版网格 -->
+        <div class="template-grid" id="templateGrid"></div>
+    </div>
+</div>
+
+<!-- ==================== 模版详情弹窗 ==================== -->
+<div class="template-detail-overlay" id="templateDetailOverlay" onclick="closeTemplateDetail(event)">
+    <div class="template-detail-modal" onclick="event.stopPropagation()">
+        <button class="template-detail-close" onclick="closeTemplateDetail()">✕</button>
+        <div class="template-detail-content">
+            <div class="template-detail-hero" style="cursor:pointer;" onclick="openImageModal(document.getElementById('templateDetailImg').src)">
+                <img id="templateDetailImg" src="" alt="效果图">
+            </div>
+            <div class="template-detail-info">
+                <h2 id="templateDetailName"></h2>
+                <div class="template-detail-desc-box" style="cursor:pointer;" onclick="copyPrompt()" title="点击复制提示词">
+                    <span class="template-detail-desc-label">创作信息：</span>
+                    <span class="template-detail-desc" id="templateDetailDesc"></span>
+                </div>
+                <div class="template-detail-ref-thumb" id="templateDetailRefThumb" style="display:none;cursor:pointer;" onclick="openImageModal(document.getElementById('templateDetailRefImg').src)">
+                    <img id="templateDetailRefImg" src="" alt="参考图">
+                </div>
+                <div class="template-detail-meta">
+                    <span id="templateDetailDate"></span>
+                    <span>·</span>
+                    <span id="templateDetailUses"></span>
+                </div>
+                <div class="template-detail-stats">
+                    <span>❤️ <span id="templateDetailLikes">0</span></span>
+                    <span>💬 <span id="templateDetailComments">0</span></span>
+                </div>
+            </div>
+        </div>
+        <button class="template-detail-use-btn" onclick="useTemplate()">使用此模版</button>
+    </div>
+</div>
+
+<!-- ==================== 模版创作页面 ==================== -->
+<div class="template-create-view" id="templateCreateView" style="display:none;">
+    <header class="top-bar">
+        <button class="action-btn" onclick="closeTemplateCreate()" title="返回">←</button>
+        <span class="top-bar-title">模版创作</span>
+        <div class="top-bar-actions"></div>
+    </header>
+    <div class="template-create-body">
+        <div class="template-create-card">
+            <div class="template-create-section">
+                <div class="template-create-label">提示词</div>
+                <textarea class="template-create-prompt" id="templatePromptInput" placeholder="输入提示词..."></textarea>
+            </div>
+            <div class="template-create-section">
+                <div class="template-create-label">参考图片</div>
+                <div class="template-ref-images" id="templateRefImages"></div>
+                <button class="template-add-ref-btn" onclick="addTemplateRefImage()">+ 添加参考图</button>
+                <input type="file" id="templateRefFileInput" accept="image/*" style="display:none" onchange="handleTemplateRefUpload(event)">
+            </div>
+            <button class="template-start-btn-lg" onclick="startFromTemplate()">开始创作</button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 模板管理页面（管理员） ==================== -->
+<div class="admin-view" id="adminView" style="display:none;">
+    <header class="top-bar">
+        <button class="action-btn" onclick="closeAdminView()" title="返回对话">←</button>
+        <span class="top-bar-title">模板管理</span>
+        <div class="top-bar-actions"></div>
+    </header>
+    <div class="admin-content">
+        <div class="admin-table-card">
+            <div class="admin-table-header">
+                <h2>所有模板</h2>
+                <button class="admin-add-btn" onclick="openAdminForm()">+ 新增模板</button>
+            </div>
+            <div id="adminTableBody"></div>
+        </div>
+    </div>
+</div>
+
+<!-- 模板编辑/新增弹窗 -->
+<div class="admin-form-overlay" id="adminFormOverlay" onclick="closeAdminForm(event)">
+    <div class="admin-form-modal" onclick="event.stopPropagation()">
+        <h3 id="adminFormTitle">新增模板</h3>
+        <input type="hidden" id="adminFormEditId">
+        <div class="admin-form-field">
+            <label>模板名称</label>
+            <input type="text" id="adminFormName" placeholder="输入模板名称">
+        </div>
+        <div class="admin-form-field">
+            <label>提示词</label>
+            <textarea id="adminFormPrompt" placeholder="输入创作提示词..."></textarea>
+        </div>
+        <div class="admin-form-field">
+            <label>效果图（点击上传本地图片）</label>
+            <div class="admin-upload-box" onclick="document.getElementById('adminEffectFile').click()">
+                <img id="adminEffectPreview" class="admin-upload-img" style="display:none;">
+                <span id="adminEffectHint" class="admin-upload-hint">点击选择图片</span>
+            </div>
+            <input type="file" id="adminEffectFile" accept="image/*" style="display:none" onchange="handleAdminEffectUpload(event)">
+        </div>
+        <div class="admin-form-field">
+            <label>参考图（可选，点击上传本地图片）</label>
+            <div class="admin-upload-box" onclick="document.getElementById('adminRefFile').click()">
+                <img id="adminRefPreview" class="admin-upload-img" style="display:none;">
+                <span id="adminRefHint" class="admin-upload-hint">点击选择图片</span>
+            </div>
+            <input type="file" id="adminRefFile" accept="image/*" style="display:none" onchange="handleAdminRefUpload(event)">
+        </div>
+        <div class="admin-form-btns">
+            <button class="btn-cancel" onclick="closeAdminForm()">取消</button>
+            <button class="btn-save" onclick="saveAdminForm()">保存</button>
+        </div>
+    </div>
+</div>
 
 <script>
     /* ==================== 配置 ==================== */
@@ -1610,12 +2438,16 @@
 
     /* ==================== 登录/注册 ==================== */
     let currentUser = null;
+    let isAdmin = false;
+    const ADMIN_USERNAME = '白予诗';
+    const ADMIN_PASSWORD = 'cq021015';
 
     // 初始化：从 localStorage 恢复登录状态
     function initAuth() {
         const saved = localStorage.getItem('currentUser');
         if (saved) {
             currentUser = JSON.parse(saved);
+            isAdmin = localStorage.getItem('isAdmin') === 'true';
             updateUserUI();
         }
         // 点击侧边栏底部触发登录/用户中心
@@ -1670,6 +2502,7 @@
     function updateUserUI() {
         const avatarEl = document.getElementById('userAvatarEl');
         const nameEl = document.getElementById('userNameEl');
+        const adminBtn = document.getElementById('adminMenuBtn');
         if (currentUser) {
             const displayName = currentUser.nickname || currentUser.username;
             avatarEl.textContent = displayName.charAt(0);
@@ -1680,6 +2513,8 @@
             avatarEl.style.background = '#555';
             nameEl.textContent = '点击登录';
         }
+        // 管理员：显示管理入口
+        adminBtn.style.display = isAdmin ? '' : 'none';
         // 切换用户时重置对话状态
         currentConversationId = null;
         conversationHistory = [];
@@ -1890,6 +2725,24 @@
             return;
         }
 
+        // 管理员本地登录（无需后端）
+        if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+            currentUser = { id: 0, username: ADMIN_USERNAME, nickname: ADMIN_USERNAME, status: 1 };
+            isAdmin = true;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            localStorage.setItem('isAdmin', 'true');
+            updateUserUI();
+            closeAuthModal();
+            showToast('管理员登录成功，欢迎 ' + ADMIN_USERNAME);
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+            return;
+        }
+
+        // 普通用户走后端
+        isAdmin = false;
+        localStorage.removeItem('isAdmin');
+
         try {
             const resp = await fetch(API_BASE + '/api/auth/login', {
                 method: 'POST',
@@ -1995,7 +2848,10 @@
 
     function logout() {
         currentUser = null;
+        isAdmin = false;
         localStorage.removeItem('currentUser');
+        localStorage.removeItem('isAdmin');
+        closeAdminView();
         updateUserUI();
         showToast('已退出登录');
     }
@@ -2538,7 +3394,7 @@
     /* ==================== 点击推荐话题 ==================== */
 
     /* ==================== 新对话按钮 ==================== */
-    document.querySelector('.new-chat-btn').addEventListener('click', function() {
+    function doNewChat() {
         currentConversationId = null;
         conversationHistory = [];
         document.getElementById('messageList').innerHTML = '';
@@ -2546,6 +3402,10 @@
         if (welcome) welcome.style.display = '';
         document.querySelector('.top-bar-title').textContent = '主对话';
         renderHistoryList();
+    }
+
+    document.querySelector('.new-chat-btn').addEventListener('click', function() {
+        doNewChat();
         showToast('已开始新对话');
     });
 
@@ -2560,6 +3420,452 @@
             openSearchPanel();
         }
     });
+
+    /* ==================== AI创作模版中心 ==================== */
+    // 模版数据（管理员可动态修改）
+    let templateData = [
+        {
+            id: 1,
+            name: 'Y2K复古辣妹',
+            category: '人像',
+            prompt: 'Y2K复古日系辣妹风格的潮流写真图，中间靠右是图中女生，梳着长双马尾发型，她戴着耳机，穿着黑色T恤，T恤上有蝴蝶图案，搭配黑色短裙，整体风格酷炫时尚，背景带有日文涂鸦和棋盘格元素。',
+            coverUrl: 'https://picsum.photos/seed/t1/400/540',
+            effectUrl: 'https://picsum.photos/seed/t1e/400/540',
+            refThumbUrl: 'https://picsum.photos/seed/t1r/600/600',
+            author: '嘉创',
+            uses: '2.1万',
+            likes: 811,
+            comments: 53,
+            date: '2025/9/29',
+            refImages: []
+        },
+        {
+            id: 2,
+            name: '海边日落剪影',
+            category: '风景',
+            prompt: '海边日落时分的唯美剪影风格照片，金色阳光洒在海面上，天空呈现渐变的橙红色，人物站在海边形成美丽的剪影效果，浪花轻拍沙滩。',
+            coverUrl: 'https://picsum.photos/seed/t2/400/540',
+            effectUrl: 'https://picsum.photos/seed/t2e/400/540',
+            refThumbUrl: 'https://picsum.photos/seed/t2r/600/600',
+            author: '嘉创',
+            uses: '5.5万',
+            likes: 1203,
+            comments: 89,
+            date: '2025/8/15',
+            refImages: []
+        },
+        {
+            id: 3,
+            name: '水下光影人像',
+            category: '创意',
+            prompt: '水下光影人像摄影风格，女生在清澈的水中，光线从水面透射下来形成美丽的光斑，头发在水中飘散，整体氛围梦幻唯美，鱼群在周围游动。',
+            coverUrl: 'https://picsum.photos/seed/t3/400/540',
+            effectUrl: 'https://picsum.photos/seed/t3e/400/540',
+            refThumbUrl: 'https://picsum.photos/seed/t3r/600/600',
+            author: '嘉创',
+            uses: '5.6万',
+            likes: 987,
+            comments: 67,
+            date: '2025/7/20',
+            refImages: []
+        },
+        {
+            id: 4,
+            name: '樱花动漫少女',
+            category: '二次元',
+            prompt: '日系二次元樱花少女风格，精致的动漫画风，粉色樱花花瓣飘落，少女穿着 JK 制服，长发飘飘，背景是樱花盛开的校园，色彩柔和梦幻。',
+            coverUrl: 'https://picsum.photos/seed/t4/400/540',
+            effectUrl: 'https://picsum.photos/seed/t4e/400/540',
+            refThumbUrl: 'https://picsum.photos/seed/t4r/600/600',
+            author: '嘉创',
+            uses: '3.2万',
+            likes: 1567,
+            comments: 112,
+            date: '2025/6/10',
+            refImages: []
+        },
+        {
+            id: 5,
+            name: '赛博朋克城市',
+            category: '风格化',
+            prompt: '赛博朋克风格的未来城市夜景，霓虹灯光映照在雨湿的街道上，高楼大厦林立，全息广告牌闪烁，整体色调偏蓝紫色调，充满科技感。',
+            coverUrl: 'https://picsum.photos/seed/t5/400/540',
+            effectUrl: 'https://picsum.photos/seed/t5e/400/540',
+            refThumbUrl: 'https://picsum.photos/seed/t5r/600/600',
+            author: '嘉创',
+            uses: '4.8万',
+            likes: 2034,
+            comments: 156,
+            date: '2025/5/18',
+            refImages: []
+        },
+        {
+            id: 6,
+            name: '油画风肖像',
+            category: '风格化',
+            prompt: '经典油画风格的肖像画，模仿文艺复兴时期的绘画技法，暖色调光影，人物面部轮廓清晰，皮肤质感细腻，背景是深色的古典氛围。',
+            coverUrl: 'https://picsum.photos/seed/t6/400/540',
+            effectUrl: 'https://picsum.photos/seed/t6e/400/540',
+            refThumbUrl: 'https://picsum.photos/seed/t6r/600/600',
+            author: '嘉创',
+            uses: '1.8万',
+            likes: 678,
+            comments: 45,
+            date: '2025/4/22',
+            refImages: []
+        }
+    ];
+
+    let currentTemplate = null;
+    let templateRefImageUrls = [];
+
+    function showTemplateView() {
+        document.getElementById('templateView').style.display = 'flex';
+        document.getElementById('templateCreateView').style.display = 'none';
+        document.querySelector('.main-content').style.display = 'none';
+        document.querySelector('.sidebar').style.display = 'none';
+        renderTemplates();
+    }
+
+    function closeTemplateView() {
+        document.getElementById('templateView').style.display = 'none';
+        document.querySelector('.main-content').style.display = '';
+        document.querySelector('.sidebar').style.display = '';
+    }
+
+    function renderTemplates() {
+        const grid = document.getElementById('templateGrid');
+        grid.innerHTML = templateData.map(t => `
+            <div class="template-card" onclick="openTemplateDetail(${t.id})">
+                <img class="template-card-img" src="${t.effectUrl || t.coverUrl}" alt="${t.name}">
+                <div class="template-card-info">
+                    <div class="template-card-name">${t.name}</div>
+                    <div class="template-card-uses">${t.uses}人使用</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function filterTemplates() {
+        renderTemplates();
+    }
+
+    function openTemplateDetail(id) {
+        currentTemplate = templateData.find(t => t.id === id);
+        if (!currentTemplate) return;
+        document.getElementById('templateDetailImg').src = currentTemplate.effectUrl;
+        document.getElementById('templateDetailName').textContent = currentTemplate.name;
+        document.getElementById('templateDetailDesc').textContent = currentTemplate.prompt;
+        document.getElementById('templateDetailDate').textContent = currentTemplate.date;
+        document.getElementById('templateDetailUses').textContent = currentTemplate.uses + '人使用';
+        document.getElementById('templateDetailLikes').textContent = currentTemplate.likes;
+        document.getElementById('templateDetailComments').textContent = currentTemplate.comments;
+        // 参考图缩略图
+        const refThumb = document.getElementById('templateDetailRefThumb');
+        const refImg = document.getElementById('templateDetailRefImg');
+        if (currentTemplate.refThumbUrl) {
+            refImg.src = currentTemplate.refThumbUrl;
+            refThumb.style.display = 'block';
+        } else {
+            refThumb.style.display = 'none';
+        }
+        document.getElementById('templateDetailOverlay').classList.add('show');
+    }
+
+    function closeTemplateDetail(e) {
+        if (e && e.target !== e.currentTarget) return;
+        document.getElementById('templateDetailOverlay').classList.remove('show');
+        currentTemplate = null;
+    }
+
+    function copyPrompt() {
+        if (!currentTemplate) return;
+        navigator.clipboard.writeText(currentTemplate.prompt).then(() => {
+            showToast('提示词已复制');
+        }).catch(() => {
+            // fallback
+            const ta = document.createElement('textarea');
+            ta.value = currentTemplate.prompt;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            showToast('提示词已复制');
+        });
+    }
+
+    function useTemplate() {
+        if (!currentTemplate) return;
+        document.getElementById('templateDetailOverlay').classList.remove('show');
+        // 打开模版创作页面
+        document.getElementById('templateView').style.display = 'none';
+        document.getElementById('templateCreateView').style.display = 'flex';
+        document.getElementById('templatePromptInput').value = currentTemplate.prompt;
+        // 加载模板参考图
+        const refUrls = [...(currentTemplate.refImages || [])];
+        if (currentTemplate.refThumbUrl && refUrls.length === 0) {
+            refUrls.push(currentTemplate.refThumbUrl);
+        }
+        templateRefImageUrls = refUrls;
+        renderTemplateRefImages();
+    }
+
+    function closeTemplateCreate() {
+        document.getElementById('templateCreateView').style.display = 'none';
+        document.getElementById('templateView').style.display = 'flex';
+        templateRefImageUrls = [];
+    }
+
+    function renderTemplateRefImages() {
+        const container = document.getElementById('templateRefImages');
+        container.innerHTML = templateRefImageUrls.map((url, i) => `
+            <div class="template-ref-item">
+                <img src="${url}" alt="参考图${i+1}">
+                <button class="template-ref-remove" onclick="removeTemplateRefImage(${i})">✕</button>
+            </div>
+        `).join('');
+    }
+
+    function addTemplateRefImage() {
+        document.getElementById('templateRefFileInput').click();
+    }
+
+    function handleTemplateRefUpload(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            templateRefImageUrls.push(ev.target.result);
+            renderTemplateRefImages();
+        };
+        reader.readAsDataURL(file);
+        e.target.value = '';
+    }
+
+    function removeTemplateRefImage(index) {
+        templateRefImageUrls.splice(index, 1);
+        renderTemplateRefImages();
+    }
+
+    function startFromTemplate() {
+        const prompt = document.getElementById('templatePromptInput').value.trim();
+        if (!prompt) {
+            showToast('请输入提示词');
+            return;
+        }
+        // 关闭模版创作页面
+        document.getElementById('templateCreateView').style.display = 'none';
+        document.querySelector('.main-content').style.display = '';
+        document.querySelector('.sidebar').style.display = '';
+
+        // 创建新对话
+        doNewChat();
+
+        // 将提示词填入输入框
+        document.getElementById('userInput').value = prompt;
+
+        // 如果有参考图，设置到上传预览并激活图像生成模式
+        if (templateRefImageUrls.length > 0) {
+            uploadedImageBase64 = templateRefImageUrls[0];
+            document.getElementById('uploadPreviewImg').src = templateRefImageUrls[0];
+            document.getElementById('uploadPreview').style.display = 'flex';
+        }
+
+        // 自动开启图像生成模式
+        if (!isImageGenMode) toggleImageGen();
+
+        // 清空临时参考图数据
+        templateRefImageUrls = [];
+    }
+
+    // 修改侧边栏"AI 创作"点击事件
+    document.querySelector('.menu-item').onclick = function() { showTemplateView(); };
+
+    /* ==================== 模板管理（管理员） ==================== */
+    function openAdminView() {
+        if (!isAdmin) return;
+        document.getElementById('adminView').style.display = 'flex';
+        document.querySelector('.main-content').style.display = 'none';
+        document.querySelector('.sidebar').style.display = 'none';
+        renderAdminTable();
+    }
+
+    function closeAdminView() {
+        document.getElementById('adminView').style.display = 'none';
+        document.querySelector('.main-content').style.display = '';
+        document.querySelector('.sidebar').style.display = '';
+    }
+
+    function renderAdminTable() {
+        const container = document.getElementById('adminTableBody');
+        if (templateData.length === 0) {
+            container.innerHTML = '<div class="admin-empty">暂无模板，点击右上角"新增模板"添加</div>';
+            return;
+        }
+        let html = '<table class="admin-table"><thead><tr>' +
+            '<th>缩略图</th><th>名称</th><th>提示词</th><th>操作</th>' +
+            '</tr></thead><tbody>';
+        templateData.forEach(t => {
+            const promptShort = t.prompt.length > 50 ? t.prompt.slice(0, 50) + '...' : t.prompt;
+            const thumbSrc = t.effectUrl || t.coverUrl || '';
+            html += '<tr>' +
+                '<td class="col-thumb">' + (thumbSrc ? '<img src="' + thumbSrc + '">' : '') + '</td>' +
+                '<td class="col-name">' + t.name + '</td>' +
+                '<td class="col-prompt">' + promptShort + '</td>' +
+                '<td class="col-actions">' +
+                    '<button class="admin-action-btn edit" onclick="editTemplate(' + t.id + ')">编辑</button>' +
+                    '<button class="admin-action-btn del" onclick="deleteTemplate(' + t.id + ')">删除</button>' +
+                '</td>' +
+                '</tr>';
+        });
+        html += '</tbody></table>';
+        container.innerHTML = html;
+    }
+
+    // 管理表单图片临时存储
+    let adminEffectDataUrl = '';
+    let adminRefDataUrl = '';
+
+    function openAdminForm(editId) {
+        const overlay = document.getElementById('adminFormOverlay');
+        const title = document.getElementById('adminFormTitle');
+        const editIdInput = document.getElementById('adminFormEditId');
+
+        // 清空文件 input
+        document.getElementById('adminEffectFile').value = '';
+        document.getElementById('adminRefFile').value = '';
+
+        if (editId) {
+            const t = templateData.find(x => x.id === editId);
+            if (!t) return;
+            title.textContent = '编辑模板';
+            editIdInput.value = editId;
+            document.getElementById('adminFormName').value = t.name;
+            document.getElementById('adminFormPrompt').value = t.prompt;
+            // 预填图片
+            adminEffectDataUrl = t.effectUrl || '';
+            adminRefDataUrl = t.refThumbUrl || '';
+            updateAdminPreview('adminEffectPreview', 'adminEffectHint', adminEffectDataUrl);
+            updateAdminPreview('adminRefPreview', 'adminRefHint', adminRefDataUrl);
+        } else {
+            title.textContent = '新增模板';
+            editIdInput.value = '';
+            document.getElementById('adminFormName').value = '';
+            document.getElementById('adminFormPrompt').value = '';
+            adminEffectDataUrl = '';
+            adminRefDataUrl = '';
+            updateAdminPreview('adminEffectPreview', 'adminEffectHint', '');
+            updateAdminPreview('adminRefPreview', 'adminRefHint', '');
+        }
+
+        overlay.classList.add('show');
+    }
+
+    function updateAdminPreview(imgId, hintId, src) {
+        const img = document.getElementById(imgId);
+        const hint = document.getElementById(hintId);
+        if (src) {
+            img.src = src;
+            img.style.display = 'block';
+            hint.style.display = 'none';
+        } else {
+            img.src = '';
+            img.style.display = 'none';
+            hint.style.display = '';
+        }
+    }
+
+    function handleAdminEffectUpload(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            adminEffectDataUrl = ev.target.result;
+            updateAdminPreview('adminEffectPreview', 'adminEffectHint', adminEffectDataUrl);
+        };
+        reader.readAsDataURL(file);
+        e.target.value = '';
+    }
+
+    function handleAdminRefUpload(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            adminRefDataUrl = ev.target.result;
+            updateAdminPreview('adminRefPreview', 'adminRefHint', adminRefDataUrl);
+        };
+        reader.readAsDataURL(file);
+        e.target.value = '';
+    }
+
+    function closeAdminForm(e) {
+        if (e && e.target !== e.currentTarget) return;
+        document.getElementById('adminFormOverlay').classList.remove('show');
+    }
+
+    function editTemplate(id) {
+        openAdminForm(id);
+    }
+
+    function deleteTemplate(id) {
+        const t = templateData.find(x => x.id === id);
+        if (!t) return;
+        if (!confirm('确定删除模板「' + t.name + '」？此操作不可撤销。')) return;
+        templateData = templateData.filter(x => x.id !== id);
+        renderAdminTable();
+        showToast('模板已删除');
+    }
+
+    function saveAdminForm() {
+        const editId = document.getElementById('adminFormEditId').value;
+        const name = document.getElementById('adminFormName').value.trim();
+        const prompt = document.getElementById('adminFormPrompt').value.trim();
+
+        if (!name || !prompt) {
+            showToast('请填写名称和提示词');
+            return;
+        }
+        if (!adminEffectDataUrl) {
+            showToast('请上传效果图');
+            return;
+        }
+
+        if (editId) {
+            // 编辑
+            const t = templateData.find(x => x.id === parseInt(editId));
+            if (t) {
+                t.name = name;
+                t.prompt = prompt;
+                t.effectUrl = adminEffectDataUrl;
+                t.coverUrl = adminEffectDataUrl;
+                if (adminRefDataUrl) t.refThumbUrl = adminRefDataUrl;
+            }
+            showToast('模板已更新');
+        } else {
+            // 新增
+            const newId = templateData.length > 0 ? Math.max(...templateData.map(x => x.id)) + 1 : 1;
+            templateData.push({
+                id: newId,
+                name: name,
+                category: '',
+                prompt: prompt,
+                coverUrl: adminEffectDataUrl,
+                effectUrl: adminEffectDataUrl,
+                refThumbUrl: adminRefDataUrl || '',
+                author: '嘉创',
+                uses: '0',
+                likes: 0,
+                comments: 0,
+                date: new Date().toLocaleDateString('zh-CN'),
+                refImages: []
+            });
+            showToast('模板已新增');
+        }
+
+        closeAdminForm();
+        renderAdminTable();
+    }
 </script>
 
 </body>
