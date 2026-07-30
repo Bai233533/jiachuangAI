@@ -53,6 +53,7 @@ let dbInitialized = false;
 async function initDB(env) {
     if (dbInitialized) return;
     const db = env.DB;
+    try {
     await db.exec(`
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -89,7 +90,10 @@ async function initDB(env) {
         CREATE INDEX IF NOT EXISTS idx_card_keys_status ON card_keys(status);
         CREATE INDEX IF NOT EXISTS idx_conv_user ON conversations(user_id);
     `);
-    dbInitialized = true;
+        dbInitialized = true;
+    } catch (e) {
+        dbInitialized = true;
+    }
 }
 
 // ==================== 主路由 ====================
