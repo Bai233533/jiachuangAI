@@ -1,7 +1,6 @@
 name = "jiachuang-ai"
-main = "worker.js"
 compatibility_date = "2024-01-01"
-account_id = "390038fc8939e15f7ab4896a45343576"
+pages_build_output_dir = "."
 
 [[d1_databases]]
 binding = "DB"
