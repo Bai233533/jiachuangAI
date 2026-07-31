@@ -1004,6 +1004,42 @@
             font-size: 13px; font-weight: 600; color: #555;
             margin-bottom: 8px;
         }
+        .uc-usage-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .uc-usage-label {
+            font-size: 13px;
+            color: #666;
+            min-width: 60px;
+        }
+        .uc-usage-bar-wrap {
+            flex: 1;
+            height: 8px;
+            background: #e8e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .uc-usage-bar {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+        .uc-usage-bar.warn {
+            background: linear-gradient(90deg, #f093fb, #f5576c);
+        }
+        .uc-usage-bar.full {
+            background: #e74c3c;
+        }
+        .uc-usage-num {
+            font-size: 12px;
+            color: #999;
+            min-width: 45px;
+            text-align: right;
+        }
         .uc-card-input-row {
             display: flex; gap: 8px;
         }
@@ -2109,6 +2145,24 @@
             <div class="uc-vip-label" id="ucVipLabel"></div>
             <div class="uc-vip-expire" id="ucVipExpire"></div>
         </div>
+        <!-- 用量显示 -->
+        <div class="uc-section" id="ucUsageSection">
+            <div class="uc-section-title">当前额度</div>
+            <div class="uc-usage-row">
+                <span class="uc-usage-label">图像生成</span>
+                <div class="uc-usage-bar-wrap">
+                    <div class="uc-usage-bar" id="ucImageBar"></div>
+                </div>
+                <span class="uc-usage-num" id="ucImageNum">0/3</span>
+            </div>
+            <div class="uc-usage-row">
+                <span class="uc-usage-label">文字聊天</span>
+                <div class="uc-usage-bar-wrap">
+                    <div class="uc-usage-bar" id="ucChatBar"></div>
+                </div>
+                <span class="uc-usage-num" id="ucChatNum">0/5</span>
+            </div>
+        </div>
         <div class="uc-section">
             <div class="uc-section-title">卡密兑换</div>
             <div class="uc-card-input-row">
@@ -2708,6 +2762,49 @@
 
         // 加载 VIP 状态
         loadVipStatus();
+
+        // 更新用量显示
+        updateUsageDisplay();
+    }
+
+    function updateUsageDisplay() {
+        const isAdmin = currentUser && (currentUser.username === ADMIN_USERNAME || currentUser.isAdmin);
+        if (isAdmin) {
+            // 管理员显示无限制
+            document.getElementById('ucImageBar').style.width = '100%';
+            document.getElementById('ucImageBar').className = 'uc-usage-bar';
+            document.getElementById('ucImageNum').textContent = '无限制';
+            document.getElementById('ucChatBar').style.width = '100%';
+            document.getElementById('ucChatBar').className = 'uc-usage-bar';
+            document.getElementById('ucChatNum').textContent = '无限制';
+            return;
+        }
+
+        const usage = getUserUsage();
+        if (isVip()) {
+            // VIP 每日额度
+            const today = new Date().toISOString().split('T')[0];
+            const di = (usage.date === today) ? (usage.dailyImages || 0) : 0;
+            const dc = (usage.date === today) ? (usage.dailyChats || 0) : 0;
+            const imgPct = Math.min(di / 100 * 100, 100);
+            const chatPct = Math.min(dc / 200 * 100, 100);
+            document.getElementById('ucImageBar').style.width = imgPct + '%';
+            document.getElementById('ucImageBar').className = 'uc-usage-bar' + (imgPct >= 100 ? ' full' : imgPct >= 80 ? ' warn' : '');
+            document.getElementById('ucImageNum').textContent = di + '/100';
+            document.getElementById('ucChatBar').style.width = chatPct + '%';
+            document.getElementById('ucChatBar').className = 'uc-usage-bar' + (chatPct >= 100 ? ' full' : chatPct >= 80 ? ' warn' : '');
+            document.getElementById('ucChatNum').textContent = dc + '/200';
+        } else {
+            // 免费额度
+            const imgPct = Math.min(usage.imageUses / 3 * 100, 100);
+            const chatPct = Math.min(usage.chatUses / 5 * 100, 100);
+            document.getElementById('ucImageBar').style.width = imgPct + '%';
+            document.getElementById('ucImageBar').className = 'uc-usage-bar' + (imgPct >= 100 ? ' full' : imgPct >= 66 ? ' warn' : '');
+            document.getElementById('ucImageNum').textContent = usage.imageUses + '/3';
+            document.getElementById('ucChatBar').style.width = chatPct + '%';
+            document.getElementById('ucChatBar').className = 'uc-usage-bar' + (chatPct >= 100 ? ' full' : chatPct >= 60 ? ' warn' : '');
+            document.getElementById('ucChatNum').textContent = usage.chatUses + '/5';
+        }
     }
 
     function closeUserCenter() {
