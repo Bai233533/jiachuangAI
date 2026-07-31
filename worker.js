@@ -357,15 +357,9 @@ async function handleRegister(request, env) {
 
     const userId = result.meta.last_row_rowid;
 
-    // 新用户赠送 1 天 VIP
-    const freeTrialKey = 'FREE-' + username + '-' + Date.now();
-    await db.prepare(
-        "INSERT INTO card_keys (card_key, type, duration_days, status, user_id, used_at) VALUES (?, 'vip', 1, 'used', ?, datetime('now'))"
-    ).bind(freeTrialKey, userId).run();
-
     return jsonResponse({
         success: true,
-        message: '注册成功，已赠送1天VIP体验',
+        message: '注册成功',
         user: { id: userId, username, nickname: username },
     });
 }

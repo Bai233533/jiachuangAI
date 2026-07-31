@@ -126,15 +126,9 @@ app.post('/api/auth/register', (req, res) => {
 
     const userId = result.lastInsertRowid;
 
-    // 新用户赠送 1 天 VIP
-    const freeTrialKey = 'FREE-' + username + '-' + Date.now();
-    db.prepare(
-        "INSERT INTO card_keys (card_key, type, duration_days, status, user_id, used_at) VALUES (?, 'vip', 1, 'used', ?, datetime('now'))"
-    ).run(freeTrialKey, userId);
-
     res.json({
         success: true,
-        message: '注册成功，已赠送1天VIP体验',
+        message: '注册成功',
         user: { id: userId, username, nickname: username }
     });
 });
