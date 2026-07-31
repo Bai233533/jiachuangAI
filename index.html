@@ -1671,6 +1671,59 @@
             background: #ffe0e0;
         }
 
+        /* 入口弹窗 */
+        .welcome-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+        .welcome-overlay.show { display: flex; }
+        .welcome-box {
+            background: #fff;
+            border-radius: 16px;
+            padding: 36px 32px 28px;
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            animation: slideUp 0.3s ease;
+        }
+        .welcome-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        .welcome-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 12px;
+        }
+        .welcome-desc {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 24px;
+        }
+        .welcome-desc p { margin-bottom: 8px; }
+        .welcome-btn {
+            width: 100%;
+            height: 46px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            transition: transform 0.2s;
+        }
+        .welcome-btn:hover { transform: scale(1.02); }
+
         /* 模板编辑弹窗 */
         .admin-form-overlay {
             display: none;
@@ -2149,6 +2202,20 @@
             </div>
             <div id="adminTableBody"></div>
         </div>
+    </div>
+</div>
+
+<!-- 入口欢迎弹窗 -->
+<div class="welcome-overlay" id="welcomeOverlay">
+    <div class="welcome-box">
+        <div class="welcome-icon">💬</div>
+        <div class="welcome-title">欢迎来到嘉创AI</div>
+        <div class="welcome-desc">
+            <p>📩 <b>纯文字聊天</b> — 直接输入问题，AI对话解答</p>
+            <p>🖼️ <b>图像生成</b> — 点击下方「图像生成」按钮，输入描述即可生图</p>
+            <p>🎁 新用户赠送 <b>3次生图 + 5次聊天</b> 免费额度</p>
+        </div>
+        <button class="welcome-btn" onclick="closeWelcome()">我知道了</button>
     </div>
 </div>
 
@@ -3026,9 +3093,15 @@
 
         // 如果是图像生成模式，走图像生成流程
         if (isImageGenMode) {
+            const check = checkCanImageGen();
+            if (!check.ok) { showUsageLimit(check.msg); return; }
             sendImageGen(text);
             return;
         }
+
+        // 纯文字聊天模式
+        const chatCheck = checkCanChat();
+        if (!chatCheck.ok) { showUsageLimit(chatCheck.msg); return; }
 
         // 清空可能残留的上传预览
         clearUpload();
@@ -3174,6 +3247,8 @@
                 if (currentConversationId === targetConvId) {
                     conversationHistory = targetMessages;
                 }
+                // 记录聊天用量（成功后）
+                if (!isImageGenMode) recordChatUse();
             } else if (bubble) {
                 bubble.innerHTML = '<span style="color:#999;">未收到回复，请重试。</span>';
             }
@@ -3339,6 +3414,9 @@
             // 清除上传的图片
             clearUpload();
 
+            // 记录生图用量（成功后）
+            recordImageUse();
+
         } catch (error) {
             hideTyping();
             console.error('图像生成错误:', error);
@@ -3457,6 +3535,9 @@
     // 页面加载时获取天气
     fetchWeather();
 
+    // 页面加载时显示欢迎弹窗
+    showWelcome();
+
     /* ==================== 点击推荐话题 ==================== */
 
     /* ==================== 新对话按钮 ==================== */
@@ -3515,6 +3596,107 @@
         } catch (e) {
             console.warn('加载模板失败，使用空列表', e);
         }
+    }
+
+    // ===== 入口弹窗 =====
+    function showWelcome() {
+        if (!localStorage.getItem('jiachuang_welcomed')) {
+            document.getElementById('welcomeOverlay').classList.add('show');
+        }
+    }
+    function closeWelcome() {
+        document.getElementById('welcomeOverlay').classList.remove('show');
+        localStorage.setItem('jiachuang_welcomed', '1');
+    }
+
+    // ===== 用量跟踪 =====
+    function getUserUsage() {
+        const key = 'jiachuang_usage_' + (currentUser ? currentUser.id : 'anon');
+        const raw = localStorage.getItem(key);
+        if (raw) return JSON.parse(raw);
+        return { imageUses: 0, chatUses: 0 };
+    }
+    function setUserUsage(usage) {
+        const key = 'jiachuang_usage_' + (currentUser ? currentUser.id : 'anon');
+        localStorage.setItem(key, JSON.stringify(usage));
+    }
+    function getFreeLimits() {
+        return { imageLimit: 3, chatLimit: 5 };
+    }
+    function isVip() {
+        if (!currentUser || !currentUser.vip_expires) return false;
+        return new Date(currentUser.vip_expires) > new Date();
+    }
+    function getDailyLimits() {
+        return { imageLimit: 100, chatLimit: 200 };
+    }
+    function checkCanImageGen() {
+        if (isVip()) {
+            const usage = getUserUsage();
+            const today = new Date().toISOString().split('T')[0];
+            if (usage.date !== today) {
+                usage.date = today;
+                usage.dailyImages = 0;
+                usage.dailyChats = 0;
+            }
+            if (usage.dailyImages >= getDailyLimits().imageLimit) {
+                return { ok: false, msg: '今日生图次数已用完（100次/天），请购买卡密续费VIP' };
+            }
+            return { ok: true };
+        }
+        const usage = getUserUsage();
+        if (usage.imageUses >= getFreeLimits().imageLimit) {
+            return { ok: false, msg: '免费生图次数已用完（3次），请购买卡密兑换VIP获取更多次数' };
+        }
+        return { ok: true };
+    }
+    function checkCanChat() {
+        if (isVip()) {
+            const usage = getUserUsage();
+            const today = new Date().toISOString().split('T')[0];
+            if (usage.date !== today) {
+                usage.date = today;
+                usage.dailyImages = 0;
+                usage.dailyChats = 0;
+            }
+            if (usage.dailyChats >= getDailyLimits().chatLimit) {
+                return { ok: false, msg: '今日聊天次数已用完（200次/天），请购买卡密续费VIP' };
+            }
+            return { ok: true };
+        }
+        const usage = getUserUsage();
+        if (usage.chatUses >= getFreeLimits().chatLimit) {
+            return { ok: false, msg: '免费聊天次数已用完（5次），请购买卡密兑换VIP获取更多次数' };
+        }
+        return { ok: true };
+    }
+    function recordImageUse() {
+        const usage = getUserUsage();
+        if (isVip()) {
+            const today = new Date().toISOString().split('T')[0];
+            if (usage.date !== today) { usage.date = today; usage.dailyImages = 0; usage.dailyChats = 0; }
+            usage.dailyImages = (usage.dailyImages || 0) + 1;
+        } else {
+            usage.imageUses = (usage.imageUses || 0) + 1;
+        }
+        setUserUsage(usage);
+    }
+    function recordChatUse() {
+        const usage = getUserUsage();
+        if (isVip()) {
+            const today = new Date().toISOString().split('T')[0];
+            if (usage.date !== today) { usage.date = today; usage.dailyImages = 0; usage.dailyChats = 0; }
+            usage.dailyChats = (usage.dailyChats || 0) + 1;
+        } else {
+            usage.chatUses = (usage.chatUses || 0) + 1;
+        }
+        setUserUsage(usage);
+    }
+    function showUsageLimit(msg) {
+        showToast(msg);
+        setTimeout(() => {
+            showToast('请点击左下角用户 → 兑换卡密');
+        }, 2000);
     }
 
     function showTemplateView() {
