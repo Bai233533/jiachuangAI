@@ -2871,8 +2871,13 @@
             msgEl.className = 'uc-msg success';
             document.getElementById('ucCardKey').value = '';
 
-            // 刷新 VIP 状态
+            // 更新 currentUser 的 VIP 过期时间
+            currentUser.vip_expires = data.vip.expire_at;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+            // 刷新 VIP 状态和用量显示
             loadVipStatus();
+            updateUsageDisplay();
             showToast('会员续费成功');
         } catch (e) {
             msgEl.textContent = '网络错误';
