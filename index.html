@@ -2317,6 +2317,7 @@
     let conversationHistory = [];
     let isGenerating = false;
     let currentConversationId = null;
+    let generatingConversationId = null; // 追踪正在生成AI回复的对话ID
 
     /* ==================== 对话历史管理（后端 API） ==================== */
     async function getConversations() {
@@ -2379,7 +2380,10 @@
     }
 
     async function switchConversation(id) {
-        hideTyping();
+        // 如果切换的是正在生成的对话，隐藏加载动画（因为会在后面重新显示）
+        if (id != generatingConversationId) {
+            hideTyping();
+        }
         setInputEnabled(true);
 
         if (!currentUser) return;
@@ -2455,6 +2459,12 @@
         }
 
         renderHistoryList();
+        
+        // 如果切换回正在生成的对话，显示加载动画
+        if (id == generatingConversationId) {
+            setInputEnabled(false);
+            showTyping();
+        }
     }
 
     async function renderHistoryList() {
@@ -3192,7 +3202,13 @@
     async function sendMessage() {
         const input = document.getElementById('userInput');
         const text = input.value.trim();
-        if (!text || isGenerating) return;
+        if (!text) return;
+        
+        // 如果正在生成中，显示提示
+        if (isGenerating) {
+            showToast('请稍等，当前AI回复完成');
+            return;
+        }
 
         // 如果是图像生成模式，走图像生成流程
         if (isImageGenMode) {
@@ -3247,6 +3263,9 @@
 
         setInputEnabled(false);
         showTyping();
+        
+        // 设置正在生成的对话ID
+        generatingConversationId = targetConvId;
 
         try {
             const response = await fetch(API_BASE + '/api/chat', {
@@ -3366,6 +3385,9 @@
         }
 
         setInputEnabled(true);
+        
+        // 清除正在生成的对话ID
+        generatingConversationId = null;
     }
 
     /* ==================== 图像生成 ==================== */
@@ -3430,6 +3452,9 @@
 
         setInputEnabled(false);
         showTyping();
+        
+        // 设置正在生成的对话ID
+        generatingConversationId = targetConvId;
 
         try {
             const body = {
@@ -3531,6 +3556,9 @@
         }
 
         setInputEnabled(true);
+        
+        // 清除正在生成的对话ID
+        generatingConversationId = null;
     }
 
     /* ==================== 天气获取 ==================== */
