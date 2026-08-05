@@ -15,6 +15,14 @@ db.pragma('journal_mode = WAL');
 // 执行建表 SQL
 const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf-8');
 db.exec(schema);
+
+// 检查并添加images字段（兼容旧数据库）
+try {
+    db.prepare("SELECT images FROM conversations LIMIT 1").get();
+} catch (e) {
+    db.exec("ALTER TABLE conversations ADD COLUMN images TEXT DEFAULT '[]'");
+    console.log('✅ 已添加images字段到conversations表');
+}
 console.log('✅ 数据库已初始化');
 
 /* ==================== 豆包 API 配置 ==================== */
@@ -332,6 +340,7 @@ app.get('/api/conversations/:id', (req, res) => {
     if (!conv) return res.status(404).json({ error: '对话不存在' });
 
     conv.messages = JSON.parse(conv.messages || '[]');
+    conv.images = JSON.parse(conv.images || '[]');
     res.json(conv);
 });
 
@@ -366,6 +375,10 @@ app.put('/api/conversations/:id', (req, res) => {
     if (req.body.messages !== undefined) {
         updates.push('messages = ?');
         params.push(JSON.stringify(req.body.messages));
+    }
+    if (req.body.images !== undefined) {
+        updates.push('images = ?');
+        params.push(JSON.stringify(req.body.images));
     }
     updates.push('updated_at = CURRENT_TIMESTAMP');
 

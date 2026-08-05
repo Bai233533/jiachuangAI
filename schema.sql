@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS conversations (
     user_id INTEGER NOT NULL,                -- 关联用户ID
     title TEXT DEFAULT '新对话',             -- 对话标题
     messages TEXT DEFAULT '[]',              -- 消息列表（JSON字符串）
+    images TEXT DEFAULT '[]',                -- 图片列表（JSON字符串，存储每个消息对应的图片）
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)

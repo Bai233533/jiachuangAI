@@ -623,6 +623,7 @@ async function handleGetConversation(request, env, id) {
     }
 
     conv.messages = JSON.parse(conv.messages || '[]');
+    conv.images = JSON.parse(conv.images || '[]');
     return jsonResponse(conv);
 }
 
@@ -676,6 +677,10 @@ async function handleUpdateConversation(request, env, id) {
     if (body.messages !== undefined) {
         updates.push('messages = ?');
         bindValues.push(JSON.stringify(body.messages));
+    }
+    if (body.images !== undefined) {
+        updates.push('images = ?');
+        bindValues.push(JSON.stringify(body.images));
     }
     updates.push('updated_at = CURRENT_TIMESTAMP');
 

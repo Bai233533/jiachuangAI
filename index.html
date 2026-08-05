@@ -2401,12 +2401,15 @@
         msgList.innerHTML = '';
 
         // 从后端获取完整消息
+        let conversationImages = [];
         try {
             const resp = await fetch(API_BASE + '/api/conversations/' + id + '?userId=' + currentUser.id);
             const fullConv = await resp.json();
             conversationHistory = fullConv.messages || [];
+            conversationImages = fullConv.images || [];
         } catch (e) {
             conversationHistory = [];
+            conversationImages = [];
         }
 
         if (conversationHistory.length === 0) {
@@ -2416,7 +2419,7 @@
             const welcome = document.querySelector('.welcome-section');
             if (welcome) welcome.style.display = 'none';
 
-            conversationHistory.forEach(msg => {
+            conversationHistory.forEach((msg, msgIndex) => {
                 if (msg.role === 'user') {
                     const text = Array.isArray(msg.content)
                         ? msg.content.find(c => c.type === 'input_text')?.text || ''
@@ -2426,7 +2429,16 @@
                     if (msg.content && msg.content.startsWith('[图像生成] ')) {
                         const lines = msg.content.split('\n');
                         const imgPrompt = lines[0].replace('[图像生成] ', '');
-                        const imgUrls = lines.slice(1).filter(l => l.startsWith('http'));
+                        
+                        // 优先从images字段获取图片URL
+                        let imgUrls = [];
+                        const imageRecord = conversationImages.find(img => img.messageIndex === msgIndex);
+                        if (imageRecord && imageRecord.urls && imageRecord.urls.length > 0) {
+                            imgUrls = imageRecord.urls;
+                        } else {
+                            // 兼容旧数据：从content中解析图片URL
+                            imgUrls = lines.slice(1).filter(l => l.startsWith('http'));
+                        }
 
                         const msgDiv = document.createElement('div');
                         msgDiv.className = 'message ai';
@@ -3523,18 +3535,36 @@
             // 保存 AI 回复
             if (result.images && result.images.length > 0) {
                 let targetMessages = [];
+                let targetImages = [];
                 try {
                     const fullResp2 = await fetch(API_BASE + '/api/conversations/' + targetConvId + '?userId=' + currentUser.id);
                     const fullData2 = await fullResp2.json();
                     targetMessages = fullData2.messages || [];
+                    targetImages = fullData2.images || [];
                 } catch(e) {
                     targetMessages = [...conversationHistory];
+                    targetImages = [];
                 }
+                
+                // 计算当前消息在messages中的索引（用于关联图片）
+                const messageIndex = targetMessages.length;
+                
                 targetMessages.push({
                     role: 'assistant',
                     content: '[图像生成] ' + prompt + '\n' + result.images.join('\n')
                 });
-                updateConversation(targetConvId, { messages: targetMessages });
+                
+                // 保存图片到images字段
+                targetImages.push({
+                    messageIndex: messageIndex,
+                    urls: result.images
+                });
+                
+                updateConversation(targetConvId, { 
+                    messages: targetMessages,
+                    images: targetImages
+                });
+                
                 if (currentConversationId === targetConvId) {
                     conversationHistory = targetMessages;
                 }
