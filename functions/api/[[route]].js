@@ -334,6 +334,20 @@ const AGNES_API_KEY = 'cpk-b8NrIukJ8Vwk9kArOPsZClc3DAIB9gFQbP6683iWCya7TpIE';
 const AGNES_VIDEO_URL = 'https://apihub.agnes-ai.com/v1/videos';
 const AGNES_VIDEO_RESULT_URL = 'https://apihub.agnes-ai.com/agnesapi';
 
+// 带重试的 fetch（503 自动重试，最多3次，间隔30秒）
+async function fetchWithRetry(url, options = {}, maxRetries = 3, retryDelay = 30000) {
+    let lastError;
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        const response = await fetch(url, options);
+        if (response.status === 503 && attempt < maxRetries) {
+            console.log(`请求返回 503，${retryDelay / 1000}秒后重试 (${attempt}/${maxRetries})...`);
+            await new Promise(r => setTimeout(r, retryDelay));
+            continue;
+        }
+        return response;
+    }
+}
+
 // ==================== POST /api/video/generate ====================
 async function handleVideoGenerate(request, env) {
     let body;
@@ -368,7 +382,7 @@ async function handleVideoGenerate(request, env) {
             num_inference_steps: numInferenceSteps,
         };
 
-        const response = await fetch(AGNES_VIDEO_URL, {
+        const response = await fetchWithRetry(AGNES_VIDEO_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -423,7 +437,7 @@ async function handleVideoResult(request, env) {
     try {
         // 尝试两种查询方式
         let resultUrl = `${AGNES_VIDEO_RESULT_URL}?video_id=${videoId}`;
-        let response = await fetch(resultUrl, {
+        let response = await fetchWithRetry(resultUrl, {
             headers: { 'Authorization': 'Bearer ' + AGNES_API_KEY },
         });
 
@@ -433,7 +447,7 @@ async function handleVideoResult(request, env) {
         // 如果第一种方式失败或没有 url，尝试 task_id 方式
         if (!result.metadata?.url) {
             resultUrl = `${AGNES_VIDEO_URL}/${videoId}`;
-            response = await fetch(resultUrl, {
+            response = await fetchWithRetry(resultUrl, {
                 headers: { 'Authorization': 'Bearer ' + AGNES_API_KEY },
             });
             result = await response.json();

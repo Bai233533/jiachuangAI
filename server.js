@@ -447,6 +447,19 @@ const AGNES_API_KEY = process.env.AGNES_API_KEY || 'cpk-b8NrIukJ8Vwk9kArOPsZClc3
 const AGNES_VIDEO_URL = 'https://apihub.agnes-ai.com/v1/videos';
 const AGNES_VIDEO_RESULT_URL = 'https://apihub.agnes-ai.com/agnesapi';
 
+// 带重试的 fetch（503 自动重试，最多3次，间隔30秒）
+async function fetchWithRetry(url, options = {}, maxRetries = 3, retryDelay = 30000) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        const response = await fetch(url, options);
+        if (response.status === 503 && attempt < maxRetries) {
+            console.log(`请求返回 503，${retryDelay / 1000}秒后重试 (${attempt}/${maxRetries})...`);
+            await new Promise(r => setTimeout(r, retryDelay));
+            continue;
+        }
+        return response;
+    }
+}
+
 /* ==================== 图像生成 API ==================== */
 const IMAGE_API_URL = 'https://ark.cn-beijing.volces.com/api/v3/images/generations';
 const IMAGE_MODEL = 'doubao-seedream-5-0-pro-260628';
@@ -542,7 +555,7 @@ app.post('/api/video/generate', async (req, res) => {
         console.log('视频生成请求:', JSON.stringify({ prompt: prompt.slice(0, 50), mode, orientation, duration }));
         console.log('使用 API Key:', AGNES_API_KEY.slice(0, 8) + '...' + AGNES_API_KEY.slice(-6));
 
-        const response = await fetch(AGNES_VIDEO_URL, {
+        const response = await fetchWithRetry(AGNES_VIDEO_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -613,7 +626,7 @@ app.get('/api/video/result', async (req, res) => {
     try {
         // 尝试两种查询方式
         let url = `${AGNES_VIDEO_RESULT_URL}?video_id=${video_id}`;
-        let response = await fetch(url, {
+        let response = await fetchWithRetry(url, {
             headers: { 'Authorization': 'Bearer ' + AGNES_API_KEY }
         });
 
@@ -623,7 +636,7 @@ app.get('/api/video/result', async (req, res) => {
         // 如果第一种方式没有 url，尝试 task_id 方式
         if (!result.metadata?.url) {
             url = `${AGNES_VIDEO_URL}/${video_id}`;
-            response = await fetch(url, {
+            response = await fetchWithRetry(url, {
                 headers: { 'Authorization': 'Bearer ' + AGNES_API_KEY }
             });
             result = await response.json();
