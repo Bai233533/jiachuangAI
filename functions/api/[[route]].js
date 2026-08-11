@@ -142,6 +142,16 @@ export async function onRequest(context) {
         return handleGenerateImage(request, env);
     }
 
+    // 视频生成：创建任务
+    if (method === 'POST' && (apiPath === '/video/generate' || path === '/api/video/generate')) {
+        return handleVideoGenerate(request, env);
+    }
+
+    // 视频生成：查询状态
+    if (method === 'GET' && (apiPath === '/video/result' || path === '/api/video/result')) {
+        return handleVideoResult(request, env);
+    }
+
     // 用户注册
     if (method === 'POST' && (apiPath === '/auth/register' || path === '/api/auth/register')) {
         return handleRegister(request, env);
@@ -315,6 +325,139 @@ async function handleGenerateImage(request, env) {
         }
         return jsonResponse({ images, raw: result });
     } catch (error) {
+        return jsonResponse({ error: '服务器内部错误: ' + error.message }, 500);
+    }
+}
+
+// ==================== Agnes 视频生成配置 ====================
+const AGNES_API_KEY = 'cpk-b8NrIukJ8Vwk9kArOPsZClc3DAIB9gFQbP6683iWCya7TpIE';
+const AGNES_VIDEO_URL = 'https://apihub.agnes-ai.com/v1/videos';
+const AGNES_VIDEO_RESULT_URL = 'https://apihub.agnes-ai.com/agnesapi';
+
+// ==================== POST /api/video/generate ====================
+async function handleVideoGenerate(request, env) {
+    let body;
+    try { body = await request.json(); } catch { return jsonResponse({ error: '请求格式错误' }, 400); }
+
+    const { prompt, mode, orientation, duration, userId, conversationId } = body;
+
+    if (!prompt) {
+        return jsonResponse({ error: '请输入视频描述' }, 400);
+    }
+
+    // 参数映射
+    const modeMap = { fast: 20, quality: 50 };
+    const orientationMap = {
+        landscape: { width: 1152, height: 768 },
+        portrait: { width: 768, height: 1152 },
+    };
+    const durationFrames = { 5: 121, 8: 193, 10: 241 };
+
+    const numInferenceSteps = modeMap[mode] || 20;
+    const { width, height } = orientationMap[orientation] || { width: 1152, height: 768 };
+    const numFrames = durationFrames[duration] || 121;
+
+    try {
+        const requestBody = {
+            model: 'agnes-video-v2.0',
+            prompt: prompt,
+            width: width,
+            height: height,
+            num_frames: numFrames,
+            frame_rate: 24,
+            num_inference_steps: numInferenceSteps,
+        };
+
+        const response = await fetch(AGNES_VIDEO_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + AGNES_API_KEY,
+            },
+            body: JSON.stringify(requestBody),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            return jsonResponse({ error: result.error?.message || result.message || '视频任务创建失败' }, response.status);
+        }
+
+        const videoData = result.data || result;
+        const videoId = videoData.video_id || '';
+        const taskId = videoData.task_id || '';
+
+        // 保存到数据库
+        const db = env.DB;
+        if (userId && videoId) {
+            await db.prepare(
+                `INSERT INTO generated_videos (user_id, task_id, video_id, prompt, mode, orientation, duration, width, height, num_frames, status, conversation_id)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+            ).bind(
+                userId, taskId, videoId, prompt, mode || 'fast', orientation || 'landscape',
+                duration || 5, width, height, numFrames, videoData.status || 'queued', conversationId || null
+            ).run();
+        }
+
+        return jsonResponse({
+            videoId: videoId,
+            taskId: taskId,
+            status: videoData.status || 'queued',
+            raw: result,
+        });
+    } catch (error) {
+        console.error('视频生成服务器错误:', error);
+        return jsonResponse({ error: '服务器内部错误: ' + error.message }, 500);
+    }
+}
+
+// ==================== GET /api/video/result ====================
+async function handleVideoResult(request, env) {
+    const url = new URL(request.url);
+    const videoId = url.searchParams.get('video_id');
+
+    if (!videoId) {
+        return jsonResponse({ error: '缺少 video_id' }, 400);
+    }
+
+    try {
+        const resultUrl = `${AGNES_VIDEO_RESULT_URL}?video_id=${videoId}`;
+        const response = await fetch(resultUrl, {
+            headers: { 'Authorization': 'Bearer ' + AGNES_API_KEY },
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            return jsonResponse({ error: result.error?.message || '查询失败' }, response.status);
+        }
+
+        const resultData = result.data || result;
+        const status = resultData.status || 'unknown';
+        const progress = resultData.progress || 0;
+        const videoUrl = resultData.metadata?.url || '';
+        const error = resultData.error || '';
+
+        // 更新数据库状态
+        const db = env.DB;
+        const video = await db.prepare('SELECT * FROM generated_videos WHERE video_id = ?').bind(videoId).first();
+        if (video) {
+            await db.prepare(
+                `UPDATE generated_videos SET status = ?, progress = ?, video_url = ?, error = ?,
+                 completed_at = CASE WHEN ? IN ('completed', 'failed') THEN CURRENT_TIMESTAMP ELSE completed_at END
+                 WHERE video_id = ?`
+            ).bind(status, progress, videoUrl, error, status, videoId).run();
+        }
+
+        return jsonResponse({
+            status: status,
+            progress: progress,
+            videoUrl: videoUrl,
+            error: error,
+            raw: result,
+        });
+    } catch (error) {
+        console.error('视频状态查询错误:', error);
         return jsonResponse({ error: '服务器内部错误: ' + error.message }, 500);
     }
 }
@@ -536,6 +679,8 @@ async function handleGetConversation(request, env, id) {
     if (!conv) return jsonResponse({ error: '对话不存在' }, 404);
 
     conv.messages = JSON.parse(conv.messages || '[]');
+    conv.images = JSON.parse(conv.images || '[]');
+    conv.videos = JSON.parse(conv.videos || '[]');
     return jsonResponse(conv);
 }
 
@@ -572,6 +717,8 @@ async function handleUpdateConversation(request, env, id) {
 
     if (body.title !== undefined) { updates.push('title = ?'); bindValues.push(body.title); }
     if (body.messages !== undefined) { updates.push('messages = ?'); bindValues.push(JSON.stringify(body.messages)); }
+    if (body.images !== undefined) { updates.push('images = ?'); bindValues.push(JSON.stringify(body.images)); }
+    if (body.videos !== undefined) { updates.push('videos = ?'); bindValues.push(JSON.stringify(body.videos)); }
     updates.push('updated_at = CURRENT_TIMESTAMP');
 
     if (updates.length > 1) {
