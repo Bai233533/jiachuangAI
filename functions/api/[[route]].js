@@ -421,12 +421,24 @@ async function handleVideoResult(request, env) {
     }
 
     try {
-        const resultUrl = `${AGNES_VIDEO_RESULT_URL}?video_id=${videoId}`;
-        const response = await fetch(resultUrl, {
+        // 尝试两种查询方式
+        let resultUrl = `${AGNES_VIDEO_RESULT_URL}?video_id=${videoId}`;
+        let response = await fetch(resultUrl, {
             headers: { 'Authorization': 'Bearer ' + AGNES_API_KEY },
         });
 
-        const result = await response.json();
+        let result = await response.json();
+        console.log('视频查询结果 (agnesapi):', JSON.stringify(result));
+
+        // 如果第一种方式失败或没有 url，尝试 task_id 方式
+        if (!result.metadata?.url) {
+            resultUrl = `${AGNES_VIDEO_URL}/${videoId}`;
+            response = await fetch(resultUrl, {
+                headers: { 'Authorization': 'Bearer ' + AGNES_API_KEY },
+            });
+            result = await response.json();
+            console.log('视频查询结果 (v1/videos):', JSON.stringify(result));
+        }
 
         if (!response.ok) {
             return jsonResponse({ error: result.error?.message || '查询失败' }, response.status);

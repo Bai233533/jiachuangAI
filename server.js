@@ -611,12 +611,24 @@ app.get('/api/video/result', async (req, res) => {
     }
 
     try {
-        const url = `${AGNES_VIDEO_RESULT_URL}?video_id=${video_id}`;
-        const response = await fetch(url, {
+        // 尝试两种查询方式
+        let url = `${AGNES_VIDEO_RESULT_URL}?video_id=${video_id}`;
+        let response = await fetch(url, {
             headers: { 'Authorization': 'Bearer ' + AGNES_API_KEY }
         });
 
-        const result = await response.json();
+        let result = await response.json();
+        console.log('视频查询结果 (agnesapi):', JSON.stringify(result));
+
+        // 如果第一种方式没有 url，尝试 task_id 方式
+        if (!result.metadata?.url) {
+            url = `${AGNES_VIDEO_URL}/${video_id}`;
+            response = await fetch(url, {
+                headers: { 'Authorization': 'Bearer ' + AGNES_API_KEY }
+            });
+            result = await response.json();
+            console.log('视频查询结果 (v1/videos):', JSON.stringify(result));
+        }
 
         if (!response.ok) {
             return res.status(response.status).json({ error: result.error?.message || '查询失败' });
