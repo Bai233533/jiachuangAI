@@ -768,6 +768,9 @@ async function handleDeleteConversation(request, env, id) {
     if (!userId) return jsonResponse({ error: '缺少用户ID' }, 400);
 
     const db = env.DB;
+    // 同步删除关联的生成视频记录
+    await db.prepare('DELETE FROM generated_videos WHERE conversation_id = ? AND user_id = ?').bind(id, userId).run();
+    // 删除对话
     await db.prepare('DELETE FROM conversations WHERE id = ? AND user_id = ?').bind(id, userId).run();
     return jsonResponse({ success: true });
 }

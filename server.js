@@ -409,6 +409,11 @@ app.delete('/api/conversations/:id', (req, res) => {
     const userId = req.query.userId || req.body.userId;
     if (!userId) return res.status(400).json({ error: '缺少用户ID' });
 
+    // 同步删除关联的生成视频记录
+    db.prepare('DELETE FROM generated_videos WHERE conversation_id = ? AND user_id = ?')
+        .run(req.params.id, userId);
+
+    // 删除对话
     db.prepare('DELETE FROM conversations WHERE id = ? AND user_id = ?')
         .run(req.params.id, userId);
 
