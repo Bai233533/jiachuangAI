@@ -3,3 +3,6 @@ jiachuang.db
 jiachuang.db-shm
 jiachuang.db-wal
 .env
+.wrangler/
+月费版的接入文档API key
+接入视频大模型文档说明

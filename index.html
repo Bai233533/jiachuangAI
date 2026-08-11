@@ -690,6 +690,207 @@
             background: #3d5bd9;
         }
 
+        /* 视频生成按钮 */
+        .vid-gen-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0;
+        }
+        .vid-gen-btn.active {
+            background: #3d4f6f;
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(61,79,111,0.3);
+        }
+        .vid-gen-btn.active:hover {
+            background: #2d3f5f;
+        }
+
+        /* 视频参数显示区域 */
+        .vid-param-display {
+            display: none;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 10px;
+            background: #f0f2f5;
+            border: 1px solid #e0e0e8;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #444;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .vid-param-display:hover {
+            background: #e8eaef;
+            border-color: #ccc;
+        }
+        .vid-param-icon {
+            font-size: 11px;
+            color: #3d4f6f;
+        }
+        .vid-param-text {
+            font-weight: 500;
+            color: #333;
+        }
+        .vid-param-sep {
+            color: #999;
+            margin: 0 1px;
+        }
+        .vid-param-arrow {
+            font-size: 11px;
+            color: #888;
+            margin-left: 2px;
+        }
+
+        /* 视频设置弹窗 */
+        .video-settings-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.3);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .video-settings-overlay.show {
+            display: flex;
+        }
+        .video-settings-box {
+            background: #fff;
+            border-radius: 16px;
+            padding: 24px 28px;
+            width: 420px;
+            max-width: 90vw;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            position: relative;
+        }
+        .video-settings-box h3 {
+            margin: 0 0 24px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a2e;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .video-settings-box h3 .vs-title-icon {
+            font-size: 20px;
+        }
+        .vs-group {
+            margin-bottom: 20px;
+        }
+        .vs-group:last-of-type {
+            margin-bottom: 0;
+        }
+        .vs-label {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+        }
+        .vs-label-icon {
+            font-size: 16px;
+        }
+        .vs-options {
+            display: flex;
+            gap: 10px;
+        }
+        .vs-opt {
+            flex: 1;
+            padding: 14px 16px;
+            border: 2px solid #e8eaef;
+            border-radius: 12px;
+            background: #fff;
+            font-size: 14px;
+            color: #555;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        .vs-opt:hover {
+            border-color: #3d4f6f;
+            color: #3d4f6f;
+        }
+        .vs-opt.selected {
+            border-color: #3d4f6f;
+            background: rgba(61,79,111,0.06);
+            color: #3d4f6f;
+            font-weight: 600;
+        }
+        .vs-opt-icon {
+            font-size: 20px;
+        }
+        .vs-opt-text {
+            font-size: 13px;
+        }
+        .video-settings-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 24px;
+        }
+        .video-settings-actions button {
+            flex: 1;
+            padding: 12px 0;
+            border-radius: 10px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .vs-cancel-btn {
+            background: #f0f2f5;
+            color: #666;
+        }
+        .vs-cancel-btn:hover {
+            background: #e4e4ec;
+        }
+        .vs-confirm-btn {
+            background: #3d4f6f;
+            color: #fff;
+        }
+        .vs-confirm-btn:hover {
+            background: #2d3f5f;
+        }
+
+        /* 视频气泡样式 */
+        .video-bubble {
+            max-width: 400px;
+        }
+        .video-bubble video {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-top: 6px;
+            background: #000;
+        }
+        .video-generating {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: #f0f4f8;
+            border-radius: 10px;
+            color: #3d4f6f;
+            font-size: 13px;
+        }
+        .video-generating .spinner {
+            width: 16px; height: 16px;
+            border: 2px solid #d0d8e4;
+            border-top: 2px solid #3d4f6f;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         /* 上传预览区 */
         .upload-preview {
             display: flex;
@@ -1571,6 +1772,103 @@
             background: #5a4bd1;
         }
 
+        /* ==================== 使用提示弹窗 ==================== */
+        .tip-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 10002;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(3px);
+            animation: fadeIn 0.3s ease;
+        }
+        .tip-overlay.show { display: flex; }
+        .tip-box {
+            background: #fff;
+            border-radius: 16px;
+            padding: 32px 28px 24px;
+            width: 400px;
+            max-width: 90vw;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            animation: slideUp 0.3s ease;
+        }
+        .tip-close {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            border: none;
+            background: #f0f0f5;
+            color: #666;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .tip-close:hover { background: #e0e0e8; }
+        .tip-icon {
+            text-align: center;
+            font-size: 40px;
+            margin-bottom: 8px;
+        }
+        .tip-title {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 20px;
+        }
+        .tip-content {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        .tip-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 14px;
+            background: #f8f8fb;
+            border-radius: 10px;
+        }
+        .tip-item-icon {
+            font-size: 22px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .tip-item-text strong {
+            display: block;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        .tip-item-text p {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+            margin: 0;
+        }
+        .tip-btn {
+            width: 100%;
+            height: 42px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .tip-btn:hover { transform: scale(1.02); }
+
         /* ==================== 模板管理页面 ==================== */
         .admin-view {
             position: fixed;
@@ -2046,6 +2344,22 @@
                     <button class="tool-btn img-gen-btn" id="imgGenBtn" onclick="toggleImageGen()" title="图像生成模式">
                         <span class="tool-icon">🖼️</span> 图像生成
                     </button>
+                    <div class="vid-gen-wrapper" id="vidGenWrapper">
+                        <button class="tool-btn vid-gen-btn" id="vidGenBtn" onclick="toggleVideoGen()" title="视频生成模式">
+                            <span class="tool-icon">🎬</span> 视频生成
+                        </button>
+                        <div class="vid-param-display" id="vidParamDisplay" onclick="openVideoSettings()" style="display:none;">
+                            <span class="vid-param-icon">▶</span>
+                            <span class="vid-param-text" id="vidParamText">视频</span>
+                            <span class="vid-param-sep">·</span>
+                            <span class="vid-param-text" id="vidParamMode">快速</span>
+                            <span class="vid-param-sep">·</span>
+                            <span class="vid-param-text" id="vidParamOrientation">横向</span>
+                            <span class="vid-param-sep">·</span>
+                            <span class="vid-param-text" id="vidParamDuration">5s</span>
+                            <span class="vid-param-arrow">∨</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2273,6 +2587,97 @@
     </div>
 </div>
 
+<!-- 使用提示弹窗（每次进入都显示） -->
+<div class="tip-overlay" id="tipOverlay" onclick="closeTip(event)">
+    <div class="tip-box" onclick="event.stopPropagation()">
+        <button class="tip-close" onclick="closeTip()">✕</button>
+        <div class="tip-icon">💡</div>
+        <h3 class="tip-title">使用提示</h3>
+        <div class="tip-content">
+            <div class="tip-item">
+                <span class="tip-item-icon">🔮</span>
+                <div class="tip-item-text">
+                    <strong>图像生成</strong>
+                    <p>输入描述后，点击底部「图像生成」按钮，即可生成图片</p>
+                </div>
+            </div>
+            <div class="tip-item">
+                <span class="tip-item-icon">💬</span>
+                <div class="tip-item-text">
+                    <strong>正常聊天</strong>
+                    <p>直接输入文字发送，即可与AI对话</p>
+                </div>
+            </div>
+            <div class="tip-item">
+                <span class="tip-item-icon">🎬</span>
+                <div class="tip-item-text">
+                    <strong>视频生成</strong>
+                    <p>点击底部「视频生成」按钮，选择模式/方向/时长即可生成视频</p>
+                </div>
+            </div>
+            <div class="tip-item">
+                <span class="tip-item-icon">🎨</span>
+                <div class="tip-item-text">
+                    <strong>模版中心</strong>
+                    <p>AI创作中的创作模板每天会更新，欢迎体验</p>
+                </div>
+            </div>
+        </div>
+        <button class="tip-btn" onclick="closeTip()">我知道了</button>
+    </div>
+</div>
+
+<!-- 视频设置弹窗 -->
+<div class="video-settings-overlay" id="videoSettingsOverlay" onclick="closeVideoSettings(event)">
+    <div class="video-settings-box" onclick="event.stopPropagation()">
+        <h3><span class="vs-title-icon">⚙</span> 视频设置</h3>
+        <div class="vs-group">
+            <span class="vs-label"><span class="vs-label-icon">⚡</span> 模式</span>
+            <div class="vs-options" data-key="mode">
+                <div class="vs-opt selected" data-value="fast">
+                    <span class="vs-opt-icon">⚡</span>
+                    <span class="vs-opt-text">快速</span>
+                </div>
+                <div class="vs-opt" data-value="quality">
+                    <span class="vs-opt-icon">HD</span>
+                    <span class="vs-opt-text">质量</span>
+                </div>
+            </div>
+        </div>
+        <div class="vs-group">
+            <span class="vs-label"><span class="vs-label-icon">📐</span> 方向</span>
+            <div class="vs-options" data-key="orientation">
+                <div class="vs-opt selected" data-value="landscape">
+                    <span class="vs-opt-icon">🖥</span>
+                    <span class="vs-opt-text">横向</span>
+                </div>
+                <div class="vs-opt" data-value="portrait">
+                    <span class="vs-opt-icon">📱</span>
+                    <span class="vs-opt-text">纵向</span>
+                </div>
+            </div>
+        </div>
+        <div class="vs-group">
+            <span class="vs-label"><span class="vs-label-icon">⏱</span> 持续时间</span>
+            <div class="vs-options" data-key="duration">
+                <div class="vs-opt selected" data-value="5">
+                    <span class="vs-opt-text">5s</span>
+                </div>
+                <div class="vs-opt" data-value="8">
+                    <span class="vs-opt-text">8s</span>
+                </div>
+                <div class="vs-opt" data-value="10">
+                    <span class="vs-opt-text">10s</span>
+                </div>
+            </div>
+        </div>
+        <div class="video-settings-actions">
+            <button class="vs-cancel-btn" onclick="closeVideoSettings()">取消</button>
+            <button class="vs-confirm-btn" onclick="confirmVideoSettings()">确认</button>
+        </div>
+    </div>
+</div>
+
 <!-- 模板编辑/新增弹窗 -->
 <div class="admin-form-overlay" id="adminFormOverlay" onclick="closeAdminForm(event)">
     <div class="admin-form-modal" onclick="event.stopPropagation()">
@@ -2402,14 +2807,17 @@
 
         // 从后端获取完整消息
         let conversationImages = [];
+        let conversationVideos = [];
         try {
             const resp = await fetch(API_BASE + '/api/conversations/' + id + '?userId=' + currentUser.id);
             const fullConv = await resp.json();
             conversationHistory = fullConv.messages || [];
             conversationImages = fullConv.images || [];
+            conversationVideos = fullConv.videos || [];
         } catch (e) {
             conversationHistory = [];
             conversationImages = [];
+            conversationVideos = [];
         }
 
         if (conversationHistory.length === 0) {
@@ -2459,6 +2867,46 @@
                             img.onclick = () => openImageModal(url);
                             bubble.appendChild(img);
                         });
+                        msgDiv.appendChild(avatar);
+                        msgDiv.appendChild(bubble);
+                        document.getElementById('messageList').appendChild(msgDiv);
+                    } else if (msg.content && msg.content.startsWith('[视频生成] ')) {
+                        const vidPrompt = msg.content.replace('[视频生成] ', '');
+                        
+                        // 从videos字段获取视频URL
+                        let videoData = null;
+                        const videoRecord = conversationVideos.find(v => v.messageIndex === msgIndex);
+                        if (videoRecord) {
+                            videoData = videoRecord;
+                        }
+
+                        const msgDiv = document.createElement('div');
+                        msgDiv.className = 'message ai';
+                        const avatar = document.createElement('div');
+                        avatar.className = 'message-avatar';
+                        avatar.innerHTML = '<img src="嘉创AI头像.png" alt="AI">';
+                        const bubble = document.createElement('div');
+                        bubble.className = 'message-bubble video-bubble';
+                        const promptText = document.createElement('div');
+                        promptText.style.cssText = 'font-size:13px;color:#666;margin-bottom:8px;';
+                        promptText.textContent = '已根据描述生成视频：';
+                        bubble.appendChild(promptText);
+
+                        if (videoData && videoData.url) {
+                            const video = document.createElement('video');
+                            video.src = videoData.url;
+                            video.controls = true;
+                            video.autoplay = false;
+                            video.preload = 'metadata';
+                            video.style.cssText = 'max-width:100%;border-radius:10px;background:#000;';
+                            bubble.appendChild(video);
+                        } else {
+                            const info = document.createElement('div');
+                            info.style.cssText = 'color:#999;font-size:13px;';
+                            info.textContent = '视频链接已过期或不可用';
+                            bubble.appendChild(info);
+                        }
+
                         msgDiv.appendChild(avatar);
                         msgDiv.appendChild(bubble);
                         document.getElementById('messageList').appendChild(msgDiv);
@@ -2557,6 +3005,7 @@
                 imgModal.classList.remove('show');
                 document.body.style.overflow = '';
             }
+            closeTip();
             closeAuthModal();
         }
     });
@@ -3230,6 +3679,12 @@
             return;
         }
 
+        // 如果是视频生成模式，走视频生成流程
+        if (isVideoGenMode) {
+            sendVideoGen(text);
+            return;
+        }
+
         // 纯文字聊天模式
         const chatCheck = checkCanChat();
         if (!chatCheck.ok) { showUsageLimit(chatCheck.msg); return; }
@@ -3591,6 +4046,256 @@
         generatingConversationId = null;
     }
 
+    /* ==================== 视频生成 ==================== */
+    let videoSettings = { mode: 'fast', orientation: 'landscape', duration: '5' };
+    let isVideoGenMode = false;
+
+    function toggleVideoGen() {
+        isVideoGenMode = !isVideoGenMode;
+        const btn = document.getElementById('vidGenBtn');
+        const paramDisplay = document.getElementById('vidParamDisplay');
+        const input = document.getElementById('userInput');
+
+        btn.classList.toggle('active', isVideoGenMode);
+        paramDisplay.style.display = isVideoGenMode ? 'flex' : 'none';
+        input.placeholder = isVideoGenMode ? '描述你想要生成的视频...' : '发消息...';
+
+        // 如果开启视频模式，关闭图像模式
+        if (isVideoGenMode && isImageGenMode) {
+            toggleImageGen();
+        }
+    }
+
+    function updateVideoParamDisplay() {
+        const modeMap = { fast: '快速', quality: '质量' };
+        const orientMap = { landscape: '横向', portrait: '纵向' };
+        document.getElementById('vidParamMode').textContent = modeMap[videoSettings.mode] || '快速';
+        document.getElementById('vidParamOrientation').textContent = orientMap[videoSettings.orientation] || '横向';
+        document.getElementById('vidParamDuration').textContent = videoSettings.duration + 's';
+    }
+
+    function openVideoSettings() {
+        document.getElementById('videoSettingsOverlay').classList.add('show');
+    }
+
+    function closeVideoSettings(e) {
+        if (e && e.target !== e.currentTarget) return;
+        document.getElementById('videoSettingsOverlay').classList.remove('show');
+    }
+
+    // 设置选项点击
+    document.querySelectorAll('.vs-options').forEach(group => {
+        group.querySelectorAll('.vs-opt').forEach(opt => {
+            opt.addEventListener('click', function() {
+                group.querySelectorAll('.vs-opt').forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+                videoSettings[group.dataset.key] = this.dataset.value;
+                updateVideoParamDisplay();
+            });
+        });
+    });
+
+    async function confirmVideoSettings() {
+        closeVideoSettings();
+        updateVideoParamDisplay();
+        const prompt = document.getElementById('userInput').value.trim();
+        if (!prompt) {
+            showToast('请先输入视频描述');
+            return;
+        }
+        sendVideoGen(prompt);
+    }
+
+    async function sendVideoGen(prompt) {
+        if (!prompt) return;
+
+        // 如果没有当前对话，创建一个
+        if (!currentConversationId) {
+            if (!currentUser) { showToast('请先登录'); return; }
+            const conv = await createConversation();
+            if (!conv) { showToast('创建对话失败'); return; }
+            currentConversationId = conv.id;
+            renderHistoryList();
+        }
+
+        const targetConvId = currentConversationId;
+        if (!targetConvId) { showToast('对话创建失败，请重试'); return; }
+        hideWelcome();
+
+        // 显示用户消息
+        const msgList = document.getElementById('messageList');
+        const div = document.createElement('div');
+        div.className = 'message user';
+        const userChar = currentUser ? (currentUser.nickname || currentUser.username || '我').charAt(0) : '我';
+        div.innerHTML = '<div class="message-avatar">' + userChar + '</div><div class="message-bubble">' + simpleMarkdown(prompt) + '</div>';
+        msgList.appendChild(div);
+        scrollToBottom();
+
+        document.getElementById('userInput').value = '';
+
+        // 保存用户消息
+        conversationHistory.push({
+            role: 'user',
+            content: [{ type: 'input_text', text: prompt }]
+        });
+        updateConversation(targetConvId, { messages: conversationHistory });
+
+        // 更新标题
+        const convList = await getConversations();
+        const currentConv = convList.find(c => c.id == targetConvId);
+        if (currentConv && currentConv.title === '新对话') {
+            const title = prompt.length > 20 ? prompt.slice(0, 20) + '...' : prompt;
+            updateConversation(targetConvId, { title });
+            document.querySelector('.top-bar-title').textContent = title;
+            renderHistoryList();
+        }
+
+        setInputEnabled(false);
+
+        // 显示"正在生成"提示
+        const aiMsgDiv = document.createElement('div');
+        aiMsgDiv.className = 'message ai';
+        const avatarDiv = document.createElement('div');
+        avatarDiv.className = 'message-avatar';
+        avatarDiv.innerHTML = '<img src="嘉创AI头像.png" alt="AI">';
+        const bubbleDiv = document.createElement('div');
+        bubbleDiv.className = 'message-bubble video-bubble';
+        const genDiv = document.createElement('div');
+        genDiv.className = 'video-generating';
+        genDiv.innerHTML = '<div class="spinner"></div> 视频生成中，请稍候...';
+        bubbleDiv.appendChild(genDiv);
+        aiMsgDiv.appendChild(avatarDiv);
+        aiMsgDiv.appendChild(bubbleDiv);
+        msgList.appendChild(aiMsgDiv);
+        scrollToBottom();
+
+        try {
+            const response = await fetch(API_BASE + '/api/video/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    prompt: prompt,
+                    mode: videoSettings.mode,
+                    orientation: videoSettings.orientation,
+                    duration: parseInt(videoSettings.duration),
+                    userId: currentUser.id,
+                    conversationId: targetConvId
+                })
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error || '视频任务创建失败');
+            }
+
+            const result = await response.json();
+            const videoId = result.videoId;
+
+            if (!videoId) {
+                throw new Error('未获取到视频ID');
+            }
+
+            // 轮询查询状态
+            let completed = false;
+            let attempts = 0;
+            const maxAttempts = 120; // 最多轮询 120 次（10分钟）
+
+            while (!completed && attempts < maxAttempts) {
+                await new Promise(r => setTimeout(r, 5000)); // 每5秒查一次
+                attempts++;
+
+                try {
+                    const pollResp = await fetch(API_BASE + '/api/video/result?video_id=' + videoId);
+                    if (!pollResp.ok) continue;
+                    const pollData = await pollResp.json();
+
+                    if (pollData.status === 'completed') {
+                        completed = true;
+                        // 替换占位气泡为实际视频
+                        if (currentConversationId === targetConvId) {
+                            bubbleDiv.innerHTML = '';
+                            const promptLabel = document.createElement('div');
+                            promptLabel.style.cssText = 'font-size:13px;color:#666;margin-bottom:8px;';
+                            promptLabel.textContent = '已根据描述生成视频：';
+                            bubbleDiv.appendChild(promptLabel);
+
+                            const video = document.createElement('video');
+                            video.src = pollData.videoUrl;
+                            video.controls = true;
+                            video.autoplay = false;
+                            video.preload = 'metadata';
+                            video.style.cssText = 'max-width:100%;border-radius:10px;background:#000;';
+                            bubbleDiv.appendChild(video);
+                            scrollToBottom();
+                        }
+
+                        // 保存到对话
+                        let targetMessages = [];
+                        let targetVideos = [];
+                        try {
+                            const fullResp = await fetch(API_BASE + '/api/conversations/' + targetConvId + '?userId=' + currentUser.id);
+                            const fullData = await fullResp.json();
+                            targetMessages = fullData.messages || [];
+                            targetVideos = fullData.videos || [];
+                        } catch(e) {
+                            targetMessages = [...conversationHistory];
+                            targetVideos = [];
+                        }
+
+                        const messageIndex = targetMessages.length;
+                        targetMessages.push({
+                            role: 'assistant',
+                            content: '[视频生成] ' + prompt
+                        });
+                        targetVideos.push({
+                            messageIndex: messageIndex,
+                            url: pollData.videoUrl,
+                            videoId: videoId,
+                            mode: videoSettings.mode,
+                            orientation: videoSettings.orientation,
+                            duration: parseInt(videoSettings.duration)
+                        });
+
+                        updateConversation(targetConvId, {
+                            messages: targetMessages,
+                            videos: targetVideos
+                        });
+
+                        if (currentConversationId === targetConvId) {
+                            conversationHistory = targetMessages;
+                        }
+                    } else if (pollData.status === 'failed') {
+                        throw new Error(pollData.error || '视频生成失败');
+                    }
+                    // 其他状态（queued, in_progress）继续轮询
+                } catch (pollErr) {
+                    if (pollErr.message && pollErr.message !== '视频生成失败') {
+                        console.error('轮询错误:', pollErr);
+                    } else {
+                        throw pollErr;
+                    }
+                }
+            }
+
+            if (!completed) {
+                throw new Error('视频生成超时，请稍后刷新查看');
+            }
+
+        } catch (error) {
+            console.error('视频生成错误:', error);
+            if (currentConversationId === targetConvId) {
+                let errMsg = error.message || '未知错误';
+                if (errMsg.includes('queue is full')) {
+                    errMsg = '当前生成队列繁忙，请稍后重试';
+                }
+                bubbleDiv.innerHTML = '<span style="color:#e74c3c;">视频生成失败：' + errMsg + '</span>';
+            }
+        }
+
+        setInputEnabled(true);
+        generatingConversationId = null;
+    }
+
     /* ==================== 天气获取 ==================== */
     const WEATHER_ICONS = {
         '113': '☀️',   // 晴
@@ -3694,11 +4399,23 @@
         }
     }
 
+    // ==================== 使用提示弹窗 ====================
+    function showTip() {
+        document.getElementById('tipOverlay').classList.add('show');
+    }
+    function closeTip(e) {
+        if (e && e.target !== e.currentTarget && !e.target.closest('.tip-close') && !e.target.closest('.tip-btn')) return;
+        document.getElementById('tipOverlay').classList.remove('show');
+    }
+
     // 页面加载时获取天气
     fetchWeather();
 
     // 页面加载时显示欢迎弹窗
     showWelcome();
+
+    // 每次进入页面都显示使用提示弹窗
+    showTip();
 
     /* ==================== 点击推荐话题 ==================== */
 

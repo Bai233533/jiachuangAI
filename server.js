@@ -23,6 +23,14 @@ try {
     db.exec("ALTER TABLE conversations ADD COLUMN images TEXT DEFAULT '[]'");
     console.log('✅ 已添加images字段到conversations表');
 }
+
+// 检查并添加videos字段（兼容旧数据库）
+try {
+    db.prepare("SELECT videos FROM conversations LIMIT 1").get();
+} catch (e) {
+    db.exec("ALTER TABLE conversations ADD COLUMN videos TEXT DEFAULT '[]'");
+    console.log('✅ 已添加videos字段到conversations表');
+}
 console.log('✅ 数据库已初始化');
 
 /* ==================== 豆包 API 配置 ==================== */
@@ -341,6 +349,7 @@ app.get('/api/conversations/:id', (req, res) => {
 
     conv.messages = JSON.parse(conv.messages || '[]');
     conv.images = JSON.parse(conv.images || '[]');
+    conv.videos = JSON.parse(conv.videos || '[]');
     res.json(conv);
 });
 
@@ -379,6 +388,10 @@ app.put('/api/conversations/:id', (req, res) => {
     if (req.body.images !== undefined) {
         updates.push('images = ?');
         params.push(JSON.stringify(req.body.images));
+    }
+    if (req.body.videos !== undefined) {
+        updates.push('videos = ?');
+        params.push(JSON.stringify(req.body.videos));
     }
     updates.push('updated_at = CURRENT_TIMESTAMP');
 
@@ -428,6 +441,11 @@ app.get('/api/auth/vip-status', (req, res) => {
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+/* ==================== Agnes 视频生成 API 配置 ==================== */
+const AGNES_API_KEY = process.env.AGNES_API_KEY || 'cpk-b8NrIukJ8Vwk9kArOPsZClc3DAIB9gFQbP6683iWCya7TpIE';
+const AGNES_VIDEO_URL = 'https://apihub.agnes-ai.com/v1/videos';
+const AGNES_VIDEO_RESULT_URL = 'https://apihub.agnes-ai.com/agnesapi';
 
 /* ==================== 图像生成 API ==================== */
 const IMAGE_API_URL = 'https://ark.cn-beijing.volces.com/api/v3/images/generations';
@@ -484,6 +502,195 @@ app.post('/api/generate-image', async (req, res) => {
         res.json({ images, raw: result });
     } catch (error) {
         console.error('图像生成服务器错误:', error);
+        res.status(500).json({ error: '服务器内部错误: ' + error.message });
+    }
+});
+
+/* ==================== 视频生成 API ==================== */
+
+// 创建视频生成任务
+app.post('/api/video/generate', async (req, res) => {
+    const { prompt, mode, orientation, duration, userId, conversationId } = req.body;
+
+    if (!prompt) {
+        return res.status(400).json({ error: '请输入视频描述' });
+    }
+
+    // 参数映射
+    const modeMap = { fast: 20, quality: 50 };
+    const orientationMap = {
+        landscape: { width: 1152, height: 768 },
+        portrait: { width: 768, height: 1152 }
+    };
+    const durationFrames = { 5: 121, 8: 193, 10: 241 };
+
+    const numInferenceSteps = modeMap[mode] || 20;
+    const { width, height } = orientationMap[orientation] || { width: 1152, height: 768 };
+    const numFrames = durationFrames[duration] || 121;
+
+    try {
+        const requestBody = {
+            model: 'agnes-video-v2.0',
+            prompt: prompt,
+            width: width,
+            height: height,
+            num_frames: numFrames,
+            frame_rate: 24,
+            num_inference_steps: numInferenceSteps
+        };
+
+        console.log('视频生成请求:', JSON.stringify({ prompt: prompt.slice(0, 50), mode, orientation, duration }));
+        console.log('使用 API Key:', AGNES_API_KEY.slice(0, 8) + '...' + AGNES_API_KEY.slice(-6));
+
+        const response = await fetch(AGNES_VIDEO_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + AGNES_API_KEY
+            },
+            body: JSON.stringify(requestBody)
+        });
+
+        const result = await response.json();
+
+        // 详细日志：打印完整 API 响应
+        console.log('Agnes API 响应状态:', response.status);
+        console.log('Agnes API 完整响应:', JSON.stringify(result, null, 2));
+
+        if (!response.ok) {
+            console.error('视频生成 API 错误:', response.status, result);
+            return res.status(response.status).json({ error: result.error?.message || result.message || '视频任务创建失败' });
+        }
+
+        // 保存到数据库
+        // API 返回格式：{ video_id, task_id, status, ... } 或 { data: { video_id, ... } }
+        const videoData = result.data || result;
+        const videoId = videoData.video_id || '';
+        const taskId = videoData.task_id || '';
+
+        if (userId && videoId) {
+            db.prepare(
+                `INSERT INTO generated_videos (user_id, task_id, video_id, prompt, mode, orientation, duration, width, height, num_frames, status, conversation_id)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+            ).run(
+                userId,
+                taskId,
+                videoId,
+                prompt,
+                mode || 'fast',
+                orientation || 'landscape',
+                duration || 5,
+                width,
+                height,
+                numFrames,
+                videoData.status || 'queued',
+                conversationId || null
+            );
+        }
+
+        console.log('视频任务创建成功:', { videoId, taskId, status: videoData.status });
+
+        res.json({
+            videoId: videoId,
+            taskId: taskId,
+            status: videoData.status || 'queued',
+            raw: result
+        });
+    } catch (error) {
+        console.error('视频生成服务器错误:', error);
+        res.status(500).json({ error: '服务器内部错误: ' + error.message });
+    }
+});
+
+// 轮询查询视频生成状态
+app.get('/api/video/result', async (req, res) => {
+    const { video_id } = req.query;
+
+    if (!video_id) {
+        return res.status(400).json({ error: '缺少 video_id' });
+    }
+
+    try {
+        const url = `${AGNES_VIDEO_RESULT_URL}?video_id=${video_id}`;
+        const response = await fetch(url, {
+            headers: { 'Authorization': 'Bearer ' + AGNES_API_KEY }
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            return res.status(response.status).json({ error: result.error?.message || '查询失败' });
+        }
+
+        // API 返回格式：{ status, progress, metadata: { url } } 或 { data: { status, ... } }
+        const resultData = result.data || result;
+        const status = resultData.status || 'unknown';
+        const progress = resultData.progress || 0;
+        const videoUrl = resultData.metadata?.url || '';
+        const error = resultData.error || '';
+
+        // 更新数据库状态
+        const video = db.prepare('SELECT * FROM generated_videos WHERE video_id = ?').get(video_id);
+        if (video) {
+            db.prepare(
+                `UPDATE generated_videos SET status = ?, progress = ?, video_url = ?, error = ?,
+                 completed_at = CASE WHEN ? IN ('completed', 'failed') THEN CURRENT_TIMESTAMP ELSE completed_at END
+                 WHERE video_id = ?`
+            ).run(status, progress, videoUrl, error, status, video_id);
+        }
+
+        console.log('视频状态查询:', { video_id, status, progress, hasUrl: !!videoUrl });
+
+        res.json({
+            status: status,
+            progress: progress,
+            videoUrl: videoUrl,
+            error: error,
+            raw: result
+        });
+    } catch (error) {
+        console.error('视频状态查询错误:', error);
+        res.status(500).json({ error: '服务器内部错误: ' + error.message });
+    }
+});
+
+// 代理下载视频文件（避免前端直接访问 Agnes 临时链接）
+app.get('/api/video/download', async (req, res) => {
+    const { video_id } = req.query;
+
+    if (!video_id) {
+        return res.status(400).json({ error: '缺少 video_id' });
+    }
+
+    try {
+        // 先查询数据库获取 URL
+        const video = db.prepare('SELECT video_url FROM generated_videos WHERE video_id = ?').get(video_id);
+        if (!video || !video.video_url) {
+            return res.status(404).json({ error: '视频 URL 不存在，请稍后重试' });
+        }
+
+        const response = await fetch(video.video_url);
+        if (!response.ok) {
+            return res.status(response.status).json({ error: '视频下载失败' });
+        }
+
+        res.setHeader('Content-Type', 'video/mp4');
+        res.setHeader('Content-Disposition', `inline; filename="video_${video_id}.mp4"`);
+
+        const reader = response.body.getReader();
+        const pump = async () => {
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) { res.end(); break; }
+                res.write(value);
+            }
+        };
+        pump().catch(err => {
+            console.error('视频流传输错误:', err);
+            res.end();
+        });
+    } catch (error) {
+        console.error('视频下载代理错误:', error);
         res.status(500).json({ error: '服务器内部错误: ' + error.message });
     }
 });

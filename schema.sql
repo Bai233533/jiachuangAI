@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS conversations (
     title TEXT DEFAULT '新对话',             -- 对话标题
     messages TEXT DEFAULT '[]',              -- 消息列表（JSON字符串）
     images TEXT DEFAULT '[]',                -- 图片列表（JSON字符串，存储每个消息对应的图片）
+    videos TEXT DEFAULT '[]',                -- 视频列表（JSON字符串，存储每个消息对应的视频）
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
@@ -61,3 +62,35 @@ CREATE TABLE IF NOT EXISTS templates (
 
 -- 模板表索引
 CREATE INDEX IF NOT EXISTS idx_tpl_sort ON templates(sort_order);
+
+-- 生成视频记录表
+CREATE TABLE IF NOT EXISTS generated_videos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,                -- 关联用户ID
+    task_id TEXT NOT NULL,                   -- Agnes 任务ID
+    video_id TEXT NOT NULL,                  -- Agnes 视频ID
+    prompt TEXT NOT NULL,                    -- 用户输入的提示词
+    mode TEXT DEFAULT 'fast',               -- 模式：fast=快速，quality=质量
+    orientation TEXT DEFAULT 'landscape',    -- 方向：landscape=横向，portrait=纵向
+    duration INTEGER DEFAULT 5,             -- 时长（秒）：5/8/10
+    width INTEGER DEFAULT 1152,             -- 视频宽度
+    height INTEGER DEFAULT 768,             -- 视频高度
+    num_frames INTEGER DEFAULT 121,         -- 帧数
+    status TEXT DEFAULT 'queued',           -- 状态：queued/in_progress/completed/failed
+    progress INTEGER DEFAULT 0,             -- 进度百分比
+    video_url TEXT DEFAULT '',              -- 生成的视频URL
+    local_path TEXT DEFAULT '',             -- 本地缓存路径（如已下载）
+    error TEXT DEFAULT '',                  -- 错误信息
+    conversation_id INTEGER,                -- 关联对话ID（可选）
+    message_index INTEGER,                  -- 对应消息索引（可选）
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    completed_at DATETIME,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (conversation_id) REFERENCES conversations(id)
+);
+
+-- 生成视频记录表索引
+CREATE INDEX IF NOT EXISTS idx_gv_user ON generated_videos(user_id);
+CREATE INDEX IF NOT EXISTS idx_gv_task ON generated_videos(task_id);
+CREATE INDEX IF NOT EXISTS idx_gv_video ON generated_videos(video_id);
+CREATE INDEX IF NOT EXISTS idx_gv_status ON generated_videos(status);
