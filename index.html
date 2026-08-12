@@ -690,9 +690,9 @@
             background: #3d5bd9;
         }
 
-        /* 视频生成按钮（暂时隐藏） */
+        /* 视频生成按钮 */
         .vid-gen-wrapper {
-            display: none !important;
+            display: flex;
             align-items: center;
             gap: 0;
         }
@@ -2470,6 +2470,13 @@
                 <span class="uc-usage-num" id="ucImageNum">0/3</span>
             </div>
             <div class="uc-usage-row">
+                <span class="uc-usage-label">视频生成</span>
+                <div class="uc-usage-bar-wrap">
+                    <div class="uc-usage-bar" id="ucVideoBar"></div>
+                </div>
+                <span class="uc-usage-num" id="ucVideoNum">0/2</span>
+            </div>
+            <div class="uc-usage-row">
                 <span class="uc-usage-label">文字聊天</span>
                 <div class="uc-usage-bar-wrap">
                     <div class="uc-usage-bar" id="ucChatBar"></div>
@@ -3245,6 +3252,9 @@
             document.getElementById('ucImageBar').style.width = '100%';
             document.getElementById('ucImageBar').className = 'uc-usage-bar';
             document.getElementById('ucImageNum').textContent = '无限制';
+            document.getElementById('ucVideoBar').style.width = '100%';
+            document.getElementById('ucVideoBar').className = 'uc-usage-bar';
+            document.getElementById('ucVideoNum').textContent = '无限制';
             document.getElementById('ucChatBar').style.width = '100%';
             document.getElementById('ucChatBar').className = 'uc-usage-bar';
             document.getElementById('ucChatNum').textContent = '无限制';
@@ -3256,22 +3266,31 @@
             // VIP 每日额度
             const today = new Date().toISOString().split('T')[0];
             const di = (usage.date === today) ? (usage.dailyImages || 0) : 0;
+            const dv = (usage.date === today) ? (usage.dailyVideos || 0) : 0;
             const dc = (usage.date === today) ? (usage.dailyChats || 0) : 0;
-            const imgPct = Math.min(di / 100 * 100, 100);
+            const imgPct = Math.min(di / 150 * 100, 100);
+            const vidPct = Math.min(dv / 100 * 100, 100);
             const chatPct = Math.min(dc / 200 * 100, 100);
             document.getElementById('ucImageBar').style.width = imgPct + '%';
             document.getElementById('ucImageBar').className = 'uc-usage-bar' + (imgPct >= 100 ? ' full' : imgPct >= 80 ? ' warn' : '');
-            document.getElementById('ucImageNum').textContent = di + '/100';
+            document.getElementById('ucImageNum').textContent = di + '/150';
+            document.getElementById('ucVideoBar').style.width = vidPct + '%';
+            document.getElementById('ucVideoBar').className = 'uc-usage-bar' + (vidPct >= 100 ? ' full' : vidPct >= 80 ? ' warn' : '');
+            document.getElementById('ucVideoNum').textContent = dv + '/100';
             document.getElementById('ucChatBar').style.width = chatPct + '%';
             document.getElementById('ucChatBar').className = 'uc-usage-bar' + (chatPct >= 100 ? ' full' : chatPct >= 80 ? ' warn' : '');
             document.getElementById('ucChatNum').textContent = dc + '/200';
         } else {
             // 免费额度
             const imgPct = Math.min(usage.imageUses / 3 * 100, 100);
+            const vidPct = Math.min((usage.videoUses || 0) / 2 * 100, 100);
             const chatPct = Math.min(usage.chatUses / 5 * 100, 100);
             document.getElementById('ucImageBar').style.width = imgPct + '%';
             document.getElementById('ucImageBar').className = 'uc-usage-bar' + (imgPct >= 100 ? ' full' : imgPct >= 66 ? ' warn' : '');
-            document.getElementById('ucImageNum').textContent = usage.imageUses + '/3';
+            document.getElementById('ucImageNum').textContent = (usage.imageUses || 0) + '/3';
+            document.getElementById('ucVideoBar').style.width = vidPct + '%';
+            document.getElementById('ucVideoBar').className = 'uc-usage-bar' + (vidPct >= 100 ? ' full' : vidPct >= 50 ? ' warn' : '');
+            document.getElementById('ucVideoNum').textContent = (usage.videoUses || 0) + '/2';
             document.getElementById('ucChatBar').style.width = chatPct + '%';
             document.getElementById('ucChatBar').className = 'uc-usage-bar' + (chatPct >= 100 ? ' full' : chatPct >= 60 ? ' warn' : '');
             document.getElementById('ucChatNum').textContent = usage.chatUses + '/5';
@@ -3681,6 +3700,8 @@
 
         // 如果是视频生成模式，走视频生成流程
         if (isVideoGenMode) {
+            const videoCheck = checkCanVideoGen();
+            if (!videoCheck.ok) { showUsageLimit(videoCheck.msg); return; }
             sendVideoGen(text);
             return;
         }
@@ -4261,6 +4282,9 @@
                             videos: targetVideos
                         });
 
+                        // 记录视频使用次数
+                        recordVideoUse();
+
                         if (currentConversationId === targetConvId) {
                             conversationHistory = targetMessages;
                         }
@@ -4500,14 +4524,14 @@
         localStorage.setItem(key, JSON.stringify(usage));
     }
     function getFreeLimits() {
-        return { imageLimit: 3, chatLimit: 5 };
+        return { videoLimit: 2, imageLimit: 3, chatLimit: 5 };
     }
     function isVip() {
         if (!currentUser || !currentUser.vip_expires) return false;
         return new Date(currentUser.vip_expires) > new Date();
     }
     function getDailyLimits() {
-        return { imageLimit: 100, chatLimit: 200 };
+        return { videoLimit: 100, imageLimit: 150, chatLimit: 200 };
     }
     function checkCanImageGen() {
         if (isVip()) {
@@ -4517,15 +4541,37 @@
                 usage.date = today;
                 usage.dailyImages = 0;
                 usage.dailyChats = 0;
+                usage.dailyVideos = 0;
             }
             if (usage.dailyImages >= getDailyLimits().imageLimit) {
-                return { ok: false, msg: '今日生图次数已用完（100次/天），请购买卡密续费VIP' };
+                return { ok: false, msg: '今日生图次数已用完（150次/天），请购买卡密续费VIP' };
             }
             return { ok: true };
         }
         const usage = getUserUsage();
         if (usage.imageUses >= getFreeLimits().imageLimit) {
             return { ok: false, msg: '免费生图次数已用完（3次），请购买卡密兑换VIP获取更多次数' };
+        }
+        return { ok: true };
+    }
+    function checkCanVideoGen() {
+        if (isVip()) {
+            const usage = getUserUsage();
+            const today = new Date().toISOString().split('T')[0];
+            if (usage.date !== today) {
+                usage.date = today;
+                usage.dailyImages = 0;
+                usage.dailyChats = 0;
+                usage.dailyVideos = 0;
+            }
+            if (usage.dailyVideos >= getDailyLimits().videoLimit) {
+                return { ok: false, msg: '今日视频生成次数已用完（100次/天），请购买卡密续费VIP' };
+            }
+            return { ok: true };
+        }
+        const usage = getUserUsage();
+        if (usage.videoUses >= getFreeLimits().videoLimit) {
+            return { ok: false, msg: '免费视频生成次数已用完（2次），请购买卡密兑换VIP获取更多次数' };
         }
         return { ok: true };
     }
@@ -4537,6 +4583,7 @@
                 usage.date = today;
                 usage.dailyImages = 0;
                 usage.dailyChats = 0;
+                usage.dailyVideos = 0;
             }
             if (usage.dailyChats >= getDailyLimits().chatLimit) {
                 return { ok: false, msg: '今日聊天次数已用完（200次/天），请购买卡密续费VIP' };
@@ -4553,10 +4600,21 @@
         const usage = getUserUsage();
         if (isVip()) {
             const today = new Date().toISOString().split('T')[0];
-            if (usage.date !== today) { usage.date = today; usage.dailyImages = 0; usage.dailyChats = 0; }
+            if (usage.date !== today) { usage.date = today; usage.dailyImages = 0; usage.dailyChats = 0; usage.dailyVideos = 0; }
             usage.dailyImages = (usage.dailyImages || 0) + 1;
         } else {
             usage.imageUses = (usage.imageUses || 0) + 1;
+        }
+        setUserUsage(usage);
+    }
+    function recordVideoUse() {
+        const usage = getUserUsage();
+        if (isVip()) {
+            const today = new Date().toISOString().split('T')[0];
+            if (usage.date !== today) { usage.date = today; usage.dailyImages = 0; usage.dailyChats = 0; usage.dailyVideos = 0; }
+            usage.dailyVideos = (usage.dailyVideos || 0) + 1;
+        } else {
+            usage.videoUses = (usage.videoUses || 0) + 1;
         }
         setUserUsage(usage);
     }
@@ -4564,7 +4622,7 @@
         const usage = getUserUsage();
         if (isVip()) {
             const today = new Date().toISOString().split('T')[0];
-            if (usage.date !== today) { usage.date = today; usage.dailyImages = 0; usage.dailyChats = 0; }
+            if (usage.date !== today) { usage.date = today; usage.dailyImages = 0; usage.dailyChats = 0; usage.dailyVideos = 0; }
             usage.dailyChats = (usage.dailyChats || 0) + 1;
         } else {
             usage.chatUses = (usage.chatUses || 0) + 1;
