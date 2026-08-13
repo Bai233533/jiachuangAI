@@ -1430,6 +1430,37 @@
             border-color: #6c5ce7;
         }
 
+        /* 类型筛选 Tab */
+        .template-type-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .template-type-tab {
+            padding: 8px 24px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+            background: #fff;
+            color: #666;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .template-type-tab:hover {
+            border-color: #6c5ce7;
+            color: #6c5ce7;
+        }
+
+        .template-type-tab.active {
+            background: #6c5ce7;
+            color: #fff;
+            border-color: #6c5ce7;
+        }
+
         .template-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -2507,6 +2538,12 @@
         <div class="top-bar-actions"></div>
     </header>
     <div class="template-gallery">
+        <!-- 类型筛选 Tab -->
+        <div class="template-type-tabs">
+            <div class="template-type-tab active" onclick="filterTemplatesByType('all')" data-type="all">全部</div>
+            <div class="template-type-tab" onclick="filterTemplatesByType('image')" data-type="image">图像生成</div>
+            <div class="template-type-tab" onclick="filterTemplatesByType('video')" data-type="video">视频生成</div>
+        </div>
         <!-- 模版网格 -->
         <div class="template-grid" id="templateGrid"></div>
     </div>
@@ -2697,6 +2734,13 @@
         <div class="admin-form-field">
             <label>提示词</label>
             <textarea id="adminFormPrompt" placeholder="输入创作提示词..."></textarea>
+        </div>
+        <div class="admin-form-field">
+            <label>模板类型</label>
+            <select id="adminFormType" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;background:#fff;">
+                <option value="image">图像生成</option>
+                <option value="video">视频生成</option>
+            </select>
         </div>
         <div class="admin-form-field">
             <label>效果图（点击上传本地图片）</label>
@@ -4479,6 +4523,7 @@
     /* ==================== AI创作模版中心 ==================== */
     // 模版数据（管理员可动态修改）
     let templateData = [];
+    let currentTemplateType = 'all'; // 当前筛选类型：all/image/video
 
     let currentTemplate = null;
     let templateRefImageUrls = [];
@@ -4496,6 +4541,7 @@
                     coverUrl: t.effect_url,
                     effectUrl: t.effect_url,
                     refThumbUrl: t.ref_url,
+                    type: t.type || 'image',
                     author: t.author || '嘉创',
                     date: t.created_at ? t.created_at.split('T')[0].replace(/-/g, '/') : '',
                     refImages: []
@@ -4642,6 +4688,11 @@
     }
 
     function showTemplateView() {
+        // 重置筛选类型为全部
+        currentTemplateType = 'all';
+        document.querySelectorAll('.template-type-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.type === 'all');
+        });
         // 从数据库加载最新模板
         loadTemplates().then(() => {
             renderTemplates();
@@ -4650,7 +4701,6 @@
         document.getElementById('templateCreateView').style.display = 'none';
         document.querySelector('.main-content').style.display = 'none';
         document.querySelector('.sidebar').style.display = 'none';
-        renderTemplates();
     }
 
     function closeTemplateView() {
@@ -4661,7 +4711,11 @@
 
     function renderTemplates() {
         const grid = document.getElementById('templateGrid');
-        grid.innerHTML = templateData.map(t => `
+        // 按类型筛选
+        const filtered = currentTemplateType === 'all'
+            ? templateData
+            : templateData.filter(t => t.type === currentTemplateType);
+        grid.innerHTML = filtered.map(t => `
             <div class="template-card" onclick="openTemplateDetail(${t.id})">
                 <img class="template-card-img" src="${t.effectUrl || t.coverUrl}" alt="${t.name}">
                 <div class="template-card-info">
@@ -4669,6 +4723,15 @@
                 </div>
             </div>
         `).join('');
+    }
+
+    function filterTemplatesByType(type) {
+        currentTemplateType = type;
+        // 更新 Tab 高亮
+        document.querySelectorAll('.template-type-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.type === type);
+        });
+        renderTemplates();
     }
 
     function filterTemplates() {
@@ -4793,8 +4856,14 @@
             document.getElementById('uploadPreview').style.display = 'flex';
         }
 
-        // 自动开启图像生成模式
-        if (!isImageGenMode) toggleImageGen();
+        // 根据模板类型自动开启对应生成模式
+        if (currentTemplate && currentTemplate.type === 'video') {
+            // 视频类模板：开启视频生成模式
+            if (!isVideoGenMode) toggleVideoGen();
+        } else {
+            // 图像类模板：开启图像生成模式
+            if (!isImageGenMode) toggleImageGen();
+        }
 
         // 清空临时参考图数据
         templateRefImageUrls = [];
@@ -4865,6 +4934,7 @@
             editIdInput.value = editId;
             document.getElementById('adminFormName').value = t.name;
             document.getElementById('adminFormPrompt').value = t.prompt;
+            document.getElementById('adminFormType').value = t.type || 'image';
             // 预填图片
             adminEffectDataUrl = t.effectUrl || '';
             adminRefDataUrl = t.refThumbUrl || '';
@@ -4947,6 +5017,7 @@
         const editId = document.getElementById('adminFormEditId').value;
         const name = document.getElementById('adminFormName').value.trim();
         const prompt = document.getElementById('adminFormPrompt').value.trim();
+        const type = document.getElementById('adminFormType').value;
 
         if (!name || !prompt) {
             showToast('请填写名称和提示词');
@@ -4966,6 +5037,7 @@
                     body: JSON.stringify({
                         name,
                         prompt,
+                        type,
                         effect_url: adminEffectDataUrl,
                         ref_url: adminRefDataUrl || ''
                     })
@@ -4976,6 +5048,7 @@
             if (t) {
                 t.name = name;
                 t.prompt = prompt;
+                t.type = type;
                 t.effectUrl = adminEffectDataUrl;
                 t.coverUrl = adminEffectDataUrl;
                 if (adminRefDataUrl) t.refThumbUrl = adminRefDataUrl;
@@ -4990,6 +5063,7 @@
                     body: JSON.stringify({
                         name,
                         prompt,
+                        type,
                         effect_url: adminEffectDataUrl,
                         ref_url: adminRefDataUrl || ''
                     })
@@ -5000,6 +5074,7 @@
                         id: data.id,
                         name: name,
                         prompt: prompt,
+                        type: type,
                         coverUrl: adminEffectDataUrl,
                         effectUrl: adminEffectDataUrl,
                         refThumbUrl: adminRefDataUrl || '',

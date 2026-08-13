@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS templates (
     prompt TEXT NOT NULL DEFAULT '',           -- 提示词内容
     effect_url TEXT DEFAULT '',               -- 效果图URL/Base64
     ref_url TEXT DEFAULT '',                  -- 参考图URL/Base64
+    type TEXT DEFAULT 'image',                -- 类型：image=图像生成，video=视频生成
     author TEXT DEFAULT '嘉创',               -- 作者
     sort_order INTEGER DEFAULT 0,            -- 排序权重
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,  -- 创建日期

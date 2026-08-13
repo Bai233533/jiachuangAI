@@ -742,24 +742,25 @@ app.get('/api/templates/:id', (req, res) => {
 
 // 新增模板
 app.post('/api/templates', (req, res) => {
-    const { name, prompt, effect_url, ref_url } = req.body;
+    const { name, prompt, type, effect_url, ref_url } = req.body;
     if (!name || !prompt) return res.status(400).json({ error: '名称和提示词必填' });
     const info = db.prepare(
-        'INSERT INTO templates (name, prompt, effect_url, ref_url) VALUES (?, ?, ?, ?)'
-    ).run(name, prompt, effect_url || '', ref_url || '');
+        'INSERT INTO templates (name, prompt, type, effect_url, ref_url) VALUES (?, ?, ?, ?, ?)'
+    ).run(name, prompt, type || 'image', effect_url || '', ref_url || '');
     res.json({ id: info.lastInsertRowid });
 });
 
 // 更新模板
 app.put('/api/templates/:id', (req, res) => {
-    const { name, prompt, effect_url, ref_url, sort_order } = req.body;
+    const { name, prompt, type, effect_url, ref_url, sort_order } = req.body;
     const existing = db.prepare('SELECT * FROM templates WHERE id = ?').get(req.params.id);
     if (!existing) return res.status(404).json({ error: '模板不存在' });
     db.prepare(
-        'UPDATE templates SET name=?, prompt=?, effect_url=?, ref_url=?, sort_order=?, updated_at=CURRENT_TIMESTAMP WHERE id=?'
+        'UPDATE templates SET name=?, prompt=?, type=?, effect_url=?, ref_url=?, sort_order=?, updated_at=CURRENT_TIMESTAMP WHERE id=?'
     ).run(
         name ?? existing.name,
         prompt ?? existing.prompt,
+        type ?? existing.type ?? 'image',
         effect_url ?? existing.effect_url,
         ref_url ?? existing.ref_url,
         sort_order ?? existing.sort_order,

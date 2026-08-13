@@ -915,12 +915,12 @@ async function handleGetTemplate(env, id) {
 async function handleCreateTemplate(request, env) {
     let body;
     try { body = await request.json(); } catch { return jsonResponse({ error: '请求格式错误' }, 400); }
-    const { name, prompt, effect_url, ref_url } = body;
+    const { name, prompt, type, effect_url, ref_url } = body;
     if (!name || !prompt) return jsonResponse({ error: '名称和提示词必填' }, 400);
     const db = env.DB;
     const info = await db.prepare(
-        'INSERT INTO templates (name, prompt, effect_url, ref_url) VALUES (?, ?, ?, ?)'
-    ).bind(name, prompt, effect_url || '', ref_url || '').run();
+        'INSERT INTO templates (name, prompt, type, effect_url, ref_url) VALUES (?, ?, ?, ?, ?)'
+    ).bind(name, prompt, type || 'image', effect_url || '', ref_url || '').run();
     return jsonResponse({ id: info.meta.last_row_id });
 }
 
@@ -931,10 +931,11 @@ async function handleUpdateTemplate(request, env, id) {
     const existing = await db.prepare('SELECT * FROM templates WHERE id = ?').bind(id).first();
     if (!existing) return jsonResponse({ error: '模板不存在' }, 404);
     await db.prepare(
-        'UPDATE templates SET name=?, prompt=?, effect_url=?, ref_url=?, sort_order=?, updated_at=CURRENT_TIMESTAMP WHERE id=?'
+        'UPDATE templates SET name=?, prompt=?, type=?, effect_url=?, ref_url=?, sort_order=?, updated_at=CURRENT_TIMESTAMP WHERE id=?'
     ).bind(
         body.name ?? existing.name,
         body.prompt ?? existing.prompt,
+        body.type ?? existing.type ?? 'image',
         body.effect_url ?? existing.effect_url,
         body.ref_url ?? existing.ref_url,
         body.sort_order ?? existing.sort_order,
@@ -997,6 +998,7 @@ async function initDB(env) {
             prompt TEXT NOT NULL DEFAULT '',
             effect_url TEXT DEFAULT '',
             ref_url TEXT DEFAULT '',
+            type TEXT DEFAULT 'image',
             author TEXT DEFAULT '嘉创',
             sort_order INTEGER DEFAULT 0,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
