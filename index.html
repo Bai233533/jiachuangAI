@@ -3624,6 +3624,11 @@
         const input = document.getElementById('userInput');
         btn.classList.toggle('active', isImageGenMode);
         input.placeholder = isImageGenMode ? '描述你想生成的图像...' : '发消息...';
+
+        // 如果开启图像模式，关闭视频模式
+        if (isImageGenMode && isVideoGenMode) {
+            toggleVideoGen();
+        }
     }
 
     function handleFileUpload(event) {
