@@ -2251,6 +2251,357 @@
             border-radius: 6px;
             border: 1px solid #eee;
         }
+
+        /* ==================== 毛玻璃风格覆盖 ==================== */
+
+        /* 背景装饰球 */
+        .bg-orbs {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .bg-orbs .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.4;
+        }
+        .bg-orbs .orb:nth-child(1) {
+            width: 500px; height: 500px;
+            background: #6c5ce7;
+            top: -150px; left: -150px;
+            animation: orbFloat1 10s ease-in-out infinite;
+        }
+        .bg-orbs .orb:nth-child(2) {
+            width: 400px; height: 400px;
+            background: #a29bfe;
+            top: 40%; right: -100px;
+            animation: orbFloat2 12s ease-in-out infinite;
+        }
+        .bg-orbs .orb:nth-child(3) {
+            width: 350px; height: 350px;
+            background: #74b9ff;
+            bottom: -100px; left: 35%;
+            animation: orbFloat3 14s ease-in-out infinite;
+        }
+        @keyframes orbFloat1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(80px,100px)} }
+        @keyframes orbFloat2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-60px,-80px)} }
+        @keyframes orbFloat3 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(50px,-60px)} }
+
+        /* 模板中心 - 深色渐变背景 */
+        .template-view {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e) !important;
+        }
+        .template-view .top-bar {
+            background: rgba(255,255,255,0.06) !important;
+            border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .template-view .top-bar-title {
+            color: #fff !important;
+        }
+        .template-view .top-bar-actions .action-btn {
+            color: rgba(255,255,255,0.7) !important;
+        }
+        .template-view .top-bar-actions .action-btn:hover {
+            background: rgba(255,255,255,0.1) !important;
+        }
+
+        /* 模板画廊 */
+        .template-gallery {
+            padding: 24px 32px !important;
+        }
+
+        /* 类型筛选 Tab - 毛玻璃胶囊 */
+        .template-type-tabs {
+            gap: 10px !important;
+            margin-bottom: 24px !important;
+        }
+        .template-type-tab {
+            padding: 9px 28px !important;
+            border-radius: 24px !important;
+            border: 1px solid rgba(255,255,255,0.12) !important;
+            background: rgba(255,255,255,0.06) !important;
+            color: rgba(255,255,255,0.6) !important;
+            font-weight: 500 !important;
+            transition: all 0.25s !important;
+        }
+        .template-type-tab:hover {
+            background: rgba(255,255,255,0.12) !important;
+            color: #fff !important;
+            border-color: rgba(255,255,255,0.2) !important;
+        }
+        .template-type-tab.active {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe) !important;
+            color: #fff !important;
+            border-color: transparent !important;
+            box-shadow: 0 4px 18px rgba(108,92,231,0.45) !important;
+        }
+
+        /* 模板卡片 - 毛玻璃 */
+        .template-card {
+            background: rgba(255,255,255,0.07) !important;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.1) !important;
+            border-radius: 16px !important;
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1) !important;
+        }
+        .template-card:hover {
+            transform: translateY(-6px) scale(1.02) !important;
+            border-color: rgba(255,255,255,0.22) !important;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.35), 0 0 30px rgba(108,92,231,0.12) !important;
+        }
+        .template-card-img {
+            border-radius: 16px 16px 0 0 !important;
+        }
+        .template-card-name {
+            color: #fff !important;
+        }
+        .template-card-info {
+            padding: 14px 16px !important;
+        }
+
+        /* 模板详情弹窗 - 毛玻璃 */
+        .template-detail-overlay {
+            background: rgba(0,0,0,0.6) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+        }
+        .template-detail-modal {
+            background: rgba(30,30,50,0.85) !important;
+            backdrop-filter: blur(24px) !important;
+            -webkit-backdrop-filter: blur(24px) !important;
+            border: 1px solid rgba(255,255,255,0.1) !important;
+            border-radius: 20px !important;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.4) !important;
+            overflow: hidden !important;
+        }
+        .template-detail-info {
+            padding: 24px !important;
+        }
+        .template-detail-info h2 {
+            color: #fff !important;
+        }
+        .template-detail-desc-box {
+            background: rgba(255,255,255,0.06) !important;
+            color: rgba(255,255,255,0.7) !important;
+            border: 1px solid rgba(255,255,255,0.08) !important;
+        }
+        .template-detail-desc-label {
+            color: #a29bfe !important;
+        }
+        .template-detail-meta {
+            color: rgba(255,255,255,0.4) !important;
+        }
+        .template-detail-ref-thumb img {
+            border-color: rgba(255,255,255,0.15) !important;
+        }
+        .template-detail-use-btn {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe) !important;
+            border-radius: 0 0 20px 20px !important;
+            box-shadow: 0 -4px 20px rgba(108,92,231,0.25) !important;
+            transition: all 0.25s !important;
+        }
+        .template-detail-use-btn:hover {
+            box-shadow: 0 -4px 30px rgba(108,92,231,0.45) !important;
+            transform: translateY(-2px);
+        }
+
+        /* 模版创作页面 - 深色渐变 */
+        .template-create-view {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e) !important;
+        }
+        .template-create-view .top-bar {
+            background: rgba(255,255,255,0.06) !important;
+            border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .template-create-view .top-bar-title {
+            color: #fff !important;
+        }
+        .template-create-view .top-bar-actions .action-btn {
+            color: rgba(255,255,255,0.7) !important;
+        }
+        .template-create-section {
+            background: rgba(255,255,255,0.07) !important;
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
+            border: 1px solid rgba(255,255,255,0.1) !important;
+            border-radius: 16px !important;
+            box-shadow: none !important;
+        }
+        .template-create-label {
+            color: rgba(255,255,255,0.7) !important;
+        }
+        .template-create-prompt {
+            background: rgba(255,255,255,0.06) !important;
+            border-color: rgba(255,255,255,0.12) !important;
+            color: #fff !important;
+        }
+        .template-create-prompt:focus {
+            border-color: #6c5ce7 !important;
+            background: rgba(255,255,255,0.1) !important;
+            box-shadow: 0 0 0 3px rgba(108,92,231,0.2) !important;
+        }
+        .template-add-ref-btn {
+            border-color: rgba(255,255,255,0.2) !important;
+            color: rgba(255,255,255,0.5) !important;
+        }
+        .template-add-ref-btn:hover {
+            border-color: #6c5ce7 !important;
+            color: #a29bfe !important;
+        }
+        .template-start-btn-lg {
+            box-shadow: 0 6px 25px rgba(108,92,231,0.4) !important;
+        }
+        .template-start-btn-lg:hover {
+            box-shadow: 0 10px 35px rgba(108,92,231,0.55) !important;
+        }
+
+        /* 管理员页面 - 深色渐变 */
+        .admin-view {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e) !important;
+        }
+        .admin-view .top-bar {
+            background: rgba(255,255,255,0.06) !important;
+            border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .admin-view .top-bar-title {
+            color: #fff !important;
+        }
+        .admin-view .top-bar-actions .action-btn {
+            color: rgba(255,255,255,0.7) !important;
+        }
+        .admin-table-card {
+            background: rgba(255,255,255,0.07) !important;
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
+            border: 1px solid rgba(255,255,255,0.1) !important;
+            border-radius: 16px !important;
+            box-shadow: none !important;
+        }
+        .admin-table-header h2 {
+            color: #fff !important;
+        }
+        .admin-add-btn {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe) !important;
+            box-shadow: 0 4px 15px rgba(108,92,231,0.35) !important;
+        }
+        .admin-add-btn:hover {
+            box-shadow: 0 6px 20px rgba(108,92,231,0.5) !important;
+        }
+        .admin-table th {
+            background: rgba(255,255,255,0.05) !important;
+            color: rgba(255,255,255,0.5) !important;
+            border-bottom-color: rgba(255,255,255,0.08) !important;
+        }
+        .admin-table td {
+            color: rgba(255,255,255,0.8) !important;
+            border-bottom-color: rgba(255,255,255,0.06) !important;
+        }
+        .admin-table tr:hover td {
+            background: rgba(255,255,255,0.04) !important;
+        }
+        .admin-table .col-category {
+            color: #a29bfe !important;
+        }
+        .admin-table .col-prompt {
+            color: rgba(255,255,255,0.45) !important;
+        }
+        .admin-action-btn.edit {
+            background: rgba(108,92,231,0.2) !important;
+            color: #a29bfe !important;
+        }
+        .admin-action-btn.del {
+            background: rgba(255,107,107,0.15) !important;
+            color: #ff6b6b !important;
+        }
+        .admin-empty {
+            color: rgba(255,255,255,0.3) !important;
+        }
+        .admin-table .col-thumb img {
+            border-color: rgba(255,255,255,0.12) !important;
+        }
+
+        /* 管理员表单弹窗 - 毛玻璃 */
+        .admin-form-overlay {
+            background: rgba(0,0,0,0.6) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+        }
+        .admin-form-modal {
+            background: rgba(30,30,50,0.88) !important;
+            backdrop-filter: blur(24px) !important;
+            -webkit-backdrop-filter: blur(24px) !important;
+            border: 1px solid rgba(255,255,255,0.1) !important;
+            border-radius: 20px !important;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.4) !important;
+        }
+        .admin-form-modal h3 {
+            color: #fff !important;
+        }
+        .admin-form-field label {
+            color: rgba(255,255,255,0.5) !important;
+        }
+        .admin-form-field input,
+        .admin-form-field textarea,
+        .admin-form-field select {
+            background: rgba(255,255,255,0.06) !important;
+            border-color: rgba(255,255,255,0.12) !important;
+            color: #fff !important;
+        }
+        .admin-form-field input:focus,
+        .admin-form-field textarea:focus,
+        .admin-form-field select:focus {
+            border-color: #6c5ce7 !important;
+            background: rgba(255,255,255,0.1) !important;
+            box-shadow: 0 0 0 3px rgba(108,92,231,0.2) !important;
+        }
+        .admin-form-field select option {
+            background: #1a1a2e;
+            color: #fff;
+        }
+        .admin-form-btns .btn-cancel {
+            background: rgba(255,255,255,0.08) !important;
+            color: rgba(255,255,255,0.6) !important;
+            border: 1px solid rgba(255,255,255,0.12) !important;
+        }
+        .admin-form-btns .btn-cancel:hover {
+            background: rgba(255,255,255,0.14) !important;
+            color: #fff !important;
+        }
+        .admin-form-btns .btn-save {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe) !important;
+            box-shadow: 0 4px 15px rgba(108,92,231,0.35) !important;
+        }
+        .admin-form-btns .btn-save:hover {
+            box-shadow: 0 6px 20px rgba(108,92,231,0.5) !important;
+        }
+        .admin-upload-box {
+            border-color: rgba(255,255,255,0.15) !important;
+            background: rgba(255,255,255,0.04) !important;
+        }
+        .admin-upload-box:hover {
+            border-color: #6c5ce7 !important;
+            background: rgba(255,255,255,0.08) !important;
+        }
+        .admin-upload-hint {
+            color: rgba(255,255,255,0.35) !important;
+        }
+
+        /* 使用提示弹窗 - 毛玻璃 */
+        .tip-overlay {
+            background: rgba(0,0,0,0.55) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+        }
     </style>
 </head>
 <body>
@@ -2532,6 +2883,7 @@
 
 <!-- ==================== AI创作模版中心 ==================== -->
 <div class="template-view" id="templateView" style="display:none;">
+    <div class="bg-orbs"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
     <header class="top-bar">
         <button class="action-btn" onclick="closeTemplateView()" title="返回对话">←</button>
         <span class="top-bar-title">AI 创作</span>
@@ -2577,6 +2929,7 @@
 
 <!-- ==================== 模版创作页面 ==================== -->
 <div class="template-create-view" id="templateCreateView" style="display:none;">
+    <div class="bg-orbs"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
     <header class="top-bar">
         <button class="action-btn" onclick="closeTemplateCreate()" title="返回">←</button>
         <span class="top-bar-title">模版创作</span>
@@ -2601,6 +2954,7 @@
 
 <!-- ==================== 模板管理页面（管理员） ==================== -->
 <div class="admin-view" id="adminView" style="display:none;">
+    <div class="bg-orbs"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
     <header class="top-bar">
         <button class="action-btn" onclick="closeAdminView()" title="返回对话">←</button>
         <span class="top-bar-title">模板管理</span>
