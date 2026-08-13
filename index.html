@@ -2254,41 +2254,50 @@
 
         /* ==================== 毛玻璃风格覆盖 ==================== */
 
-        /* 背景装饰球 */
+        /* 背景装饰球 - 性能优化 */
         .bg-orbs {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             z-index: 0;
             overflow: hidden;
             pointer-events: none;
+            contain: strict;
         }
         .bg-orbs .orb {
             position: absolute;
             border-radius: 50%;
             filter: blur(100px);
-            opacity: 0.4;
+            opacity: 0.35;
+            will-change: transform;
+            contain: layout style;
         }
         .bg-orbs .orb:nth-child(1) {
-            width: 500px; height: 500px;
+            width: 400px; height: 400px;
             background: #6c5ce7;
-            top: -150px; left: -150px;
-            animation: orbFloat1 10s ease-in-out infinite;
+            top: -120px; left: -120px;
+            animation: orbFloat1 12s ease-in-out infinite;
         }
         .bg-orbs .orb:nth-child(2) {
-            width: 400px; height: 400px;
+            width: 320px; height: 320px;
             background: #a29bfe;
-            top: 40%; right: -100px;
-            animation: orbFloat2 12s ease-in-out infinite;
+            top: 40%; right: -80px;
+            animation: orbFloat2 15s ease-in-out infinite;
         }
         .bg-orbs .orb:nth-child(3) {
-            width: 350px; height: 350px;
+            width: 280px; height: 280px;
             background: #74b9ff;
-            bottom: -100px; left: 35%;
-            animation: orbFloat3 14s ease-in-out infinite;
+            bottom: -80px; left: 35%;
+            animation: orbFloat3 18s ease-in-out infinite;
         }
-        @keyframes orbFloat1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(80px,100px)} }
-        @keyframes orbFloat2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-60px,-80px)} }
-        @keyframes orbFloat3 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(50px,-60px)} }
+        @keyframes orbFloat1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(60px,80px)} }
+        @keyframes orbFloat2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-40px,-50px)} }
+        @keyframes orbFloat3 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(30px,-40px)} }
+
+        /* 低性能设备减少动画 */
+        @media (prefers-reduced-motion: reduce) {
+            .bg-orbs .orb { animation: none !important; }
+            .template-card { transition: none !important; }
+        }
 
         /* 模板中心 - 深色渐变背景 */
         .template-view {
@@ -2341,14 +2350,16 @@
             box-shadow: 0 4px 18px rgba(108,92,231,0.45) !important;
         }
 
-        /* 模板卡片 - 毛玻璃 */
+        /* 模板卡片 - 毛玻璃 + 性能优化 */
         .template-card {
             background: rgba(255,255,255,0.07) !important;
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255,255,255,0.1) !important;
             border-radius: 16px !important;
-            transition: all 0.3s cubic-bezier(0.4,0,0.2,1) !important;
+            transition: transform 0.3s cubic-bezier(0.4,0,0.2,1), box-shadow 0.3s, border-color 0.3s !important;
+            will-change: transform;
+            contain: layout style;
         }
         .template-card:hover {
             transform: translateY(-6px) scale(1.02) !important;
