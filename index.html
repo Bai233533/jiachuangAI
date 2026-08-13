@@ -2917,8 +2917,9 @@
     <div class="template-detail-modal" onclick="event.stopPropagation()">
         <button class="template-detail-close" onclick="closeTemplateDetail()">✕</button>
         <div class="template-detail-content">
-            <div class="template-detail-hero" style="cursor:pointer;" onclick="openImageModal(document.getElementById('templateDetailImg').src)">
+            <div class="template-detail-hero" id="templateDetailHero" style="cursor:pointer;" onclick="openImageModal(document.getElementById('templateDetailImg').src)">
                 <img id="templateDetailImg" src="" alt="效果图">
+                <video id="templateDetailVideo" style="display:none;width:100%;" controls muted></video>
             </div>
             <div class="template-detail-info">
                 <h2 id="templateDetailName"></h2>
@@ -3102,15 +3103,16 @@
         </div>
         <div class="admin-form-field">
             <label>模板类型</label>
-            <select id="adminFormType" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;background:#fff;">
+            <select id="adminFormType" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;background:#fff;" onchange="onAdminFormTypeChange()">
                 <option value="image">图像生成</option>
                 <option value="video">视频生成</option>
             </select>
         </div>
-        <div class="admin-form-field">
-            <label>效果图（点击上传本地图片）</label>
+        <div class="admin-form-field" id="adminEffectField">
+            <label id="adminEffectLabel">效果图（点击上传本地图片）</label>
             <div class="admin-upload-box" onclick="document.getElementById('adminEffectFile').click()">
                 <img id="adminEffectPreview" class="admin-upload-img" style="display:none;">
+                <video id="adminEffectVideoPreview" class="admin-upload-img" style="display:none;" controls muted></video>
                 <span id="adminEffectHint" class="admin-upload-hint">点击选择图片</span>
             </div>
             <input type="file" id="adminEffectFile" accept="image/*" style="display:none" onchange="handleAdminEffectUpload(event)">
@@ -5106,7 +5108,27 @@
     function openTemplateDetail(id) {
         currentTemplate = templateData.find(t => t.id === id);
         if (!currentTemplate) return;
-        document.getElementById('templateDetailImg').src = currentTemplate.effectUrl;
+        const img = document.getElementById('templateDetailImg');
+        const video = document.getElementById('templateDetailVideo');
+        const hero = document.getElementById('templateDetailHero');
+
+        if (currentTemplate.type === 'video' && currentTemplate.effectUrl) {
+            // 视频模板：显示视频播放器
+            img.style.display = 'none';
+            video.src = currentTemplate.effectUrl;
+            video.style.display = 'block';
+            hero.onclick = null;
+            hero.style.cursor = 'default';
+        } else {
+            // 图像模板：显示图片
+            video.style.display = 'none';
+            video.src = '';
+            img.src = currentTemplate.effectUrl;
+            img.style.display = 'block';
+            hero.style.cursor = 'pointer';
+            hero.onclick = function() { openImageModal(document.getElementById('templateDetailImg').src); };
+        }
+
         document.getElementById('templateDetailName').textContent = currentTemplate.name;
         document.getElementById('templateDetailDesc').textContent = currentTemplate.prompt;
         document.getElementById('templateDetailDate').textContent = currentTemplate.date;
@@ -5300,16 +5322,30 @@
             document.getElementById('adminFormName').value = t.name;
             document.getElementById('adminFormPrompt').value = t.prompt;
             document.getElementById('adminFormType').value = t.type || 'image';
-            // 预填图片
+            // 触发类型切换（更新 accept 和标签）
+            onAdminFormTypeChange();
+            // 预填效果图
             adminEffectDataUrl = t.effectUrl || '';
             adminRefDataUrl = t.refThumbUrl || '';
-            updateAdminPreview('adminEffectPreview', 'adminEffectHint', adminEffectDataUrl);
+            if (t.type === 'video' && adminEffectDataUrl) {
+                // 视频模板：显示视频预览
+                const video = document.getElementById('adminEffectVideoPreview');
+                const img = document.getElementById('adminEffectPreview');
+                img.style.display = 'none';
+                video.src = adminEffectDataUrl;
+                video.style.display = 'block';
+                document.getElementById('adminEffectHint').style.display = 'none';
+            } else {
+                updateAdminPreview('adminEffectPreview', 'adminEffectHint', adminEffectDataUrl);
+            }
             updateAdminPreview('adminRefPreview', 'adminRefHint', adminRefDataUrl);
         } else {
             title.textContent = '新增模板';
             editIdInput.value = '';
             document.getElementById('adminFormName').value = '';
             document.getElementById('adminFormPrompt').value = '';
+            document.getElementById('adminFormType').value = 'image';
+            onAdminFormTypeChange();
             adminEffectDataUrl = '';
             adminRefDataUrl = '';
             updateAdminPreview('adminEffectPreview', 'adminEffectHint', '');
@@ -5336,13 +5372,53 @@
     function handleAdminEffectUpload(e) {
         const file = e.target.files[0];
         if (!file) return;
+        const type = document.getElementById('adminFormType').value;
         const reader = new FileReader();
         reader.onload = function(ev) {
             adminEffectDataUrl = ev.target.result;
-            updateAdminPreview('adminEffectPreview', 'adminEffectHint', adminEffectDataUrl);
+            if (type === 'video') {
+                // 视频预览
+                const video = document.getElementById('adminEffectVideoPreview');
+                const img = document.getElementById('adminEffectPreview');
+                img.style.display = 'none';
+                video.src = ev.target.result;
+                video.style.display = 'block';
+                document.getElementById('adminEffectHint').style.display = 'none';
+            } else {
+                // 图片预览
+                const video = document.getElementById('adminEffectVideoPreview');
+                video.style.display = 'none';
+                updateAdminPreview('adminEffectPreview', 'adminEffectHint', adminEffectDataUrl);
+            }
         };
         reader.readAsDataURL(file);
         e.target.value = '';
+    }
+
+    function onAdminFormTypeChange() {
+        const type = document.getElementById('adminFormType').value;
+        const fileInput = document.getElementById('adminEffectFile');
+        const label = document.getElementById('adminEffectLabel');
+        const hint = document.getElementById('adminEffectHint');
+        const img = document.getElementById('adminEffectPreview');
+        const video = document.getElementById('adminEffectVideoPreview');
+
+        if (type === 'video') {
+            fileInput.accept = 'video/*';
+            label.textContent = '效果图（点击上传本地视频）';
+            hint.textContent = '点击选择视频';
+        } else {
+            fileInput.accept = 'image/*';
+            label.textContent = '效果图（点击上传本地图片）';
+            hint.textContent = '点击选择图片';
+        }
+        // 清空之前的预览
+        img.style.display = 'none';
+        img.src = '';
+        video.style.display = 'none';
+        video.src = '';
+        hint.style.display = '';
+        adminEffectDataUrl = '';
     }
 
     function handleAdminRefUpload(e) {
